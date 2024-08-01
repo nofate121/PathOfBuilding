@@ -70,6 +70,7 @@ local ListClass = newClass("ListControl", "Control", "ControlHost", function(sel
 		self.controls.scrollBarH.shown = false
 		self.controls.scrollBarV.shown = false
 	end
+	self.labelPositionOffset = {0, 0}
 end)
 
 function ListClass:SelectIndex(index)
@@ -176,7 +177,7 @@ function ListClass:Draw(viewPort, noTooltip)
 
 	local label = self:GetProperty("label") 
 	if label then
-		DrawString(x, y - 20, "LEFT", 16, self.font, label)
+		DrawString(x + self.labelPositionOffset[1], y - 20 + self.labelPositionOffset[2], "LEFT", 16, self.font, label)
 	end
 	if self.otherDragSource and not self.CanDragToValue then
 		SetDrawColor(0.2, 0.6, 0.2)
@@ -421,11 +422,11 @@ function ListClass:OnKeyUp(key)
 			if self.selDragActive then
 				self.selDragActive = false
 				if self.selDragIndex and self.selDragIndex ~= self.selIndex then
-					t_remove(self.list, self.selIndex)
+					self:Remove(self.selIndex)
 					if self.selDragIndex > self.selIndex then
 						self.selDragIndex = self.selDragIndex - 1
 					end
-					t_insert(self.list, self.selDragIndex, self.selValue)
+					self:Insert(self.selDragIndex, self.selValue)
 					if self.OnOrderChange then
 						self:OnOrderChange(self.selIndex, self.selDragIndex)
 					end
@@ -472,4 +473,12 @@ function ListClass:GetHoverValue(key)
 			return value
 		end
 	end
+end
+
+function ListClass:Insert(pos, value)
+	t_insert(self.list, pos, value)
+end
+
+function ListClass:Remove(pos)
+	t_remove(self.list, pos)
 end
