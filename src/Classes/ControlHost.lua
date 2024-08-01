@@ -83,6 +83,17 @@ function ControlHostClass:ProcessControlsInput(inputEvents, viewPort)
 			end
 		end
 	end	
+
+	self:PropagateInputEvents(inputEvents, viewPort)
+
+end
+
+function ControlHostClass:PropagateInputEvents(inputEvents, viewPort)
+	for _, control in pairs(self.controls) do
+		if control:IsShown() and control.HandleInputEvents then
+			control:HandleInputEvents(self, inputEvents, viewPort)
+		end
+	end
 end
 
 function ControlHostClass:DrawControls(viewPort, selControl)

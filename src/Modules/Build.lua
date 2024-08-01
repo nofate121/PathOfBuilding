@@ -1506,6 +1506,16 @@ function buildMode:OpenSpectreLibrary()
 		controls.source:ListFilterChanged(buf, controls.searchModeDropDown.selIndex)
 		--controls.list:ListFilterChanged(buf) -- filter left list
 	end, nil, nil, true)	
+	controls.searchText.HandleInputEvents = function (controlSelf, controlHost, inputEvents, viewPort)
+		for id, event in ipairs(inputEvents) do
+			if event.type == "KeyDown" then
+				if event.key == "f" and IsKeyDown("CTRL") then
+					controlHost:SelectControl(controlSelf)
+					inputEvents[id] = nil
+				end
+			end
+		end
+	end
 	controls.list = new("MinionListControl", nil, -100, 60, 190, 250, self.data, destList)
 	controls.source = new("MinionListControl", nil, 100, 60, 190, 250, self.data, sourceList, controls.list)
 	controls.save = new("ButtonControl", nil, -45, 350, 80, 20, "Save", function()
