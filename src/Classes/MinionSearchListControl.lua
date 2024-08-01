@@ -1,7 +1,7 @@
 -- Path of Building
 --
 -- Class: Minion Search List
--- Minion list control with search field.
+-- Minion list control with search field. Cannot be mutable.
 --
 local ipairs = ipairs
 local t_insert = table.insert
@@ -11,6 +11,7 @@ local s_format = string.format
 local MinionSearchListClass = newClass("MinionSearchListControl", "MinionListControl", function(self, anchor, x, y, width, height, data, list, dest)
 	self.MinionListControl(anchor, x, y, width, height, data, list, dest)	
 	self.unfilteredList = copyTable(list)
+	self.isMutable = false
 
 	self.controls.searchText = new("EditControl", {"BOTTOMLEFT",self,"TOPLEFT"}, 0, -2, 128, 18, "", "Search", "%c", 100, function(buf)
 		self:ListFilterChanged(buf, self.controls.searchModeDropDown.selIndex)
