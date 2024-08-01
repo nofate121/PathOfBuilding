@@ -4,6 +4,8 @@
 -- Minion list control.
 --
 local ipairs = ipairs
+local t_insert = table.insert
+local t_remove = table.remove
 local s_format = string.format
 
 local MinionListClass = newClass("MinionListControl", "ListControl", function(self, anchor, x, y, width, height, data, list, dest)
@@ -32,7 +34,7 @@ end)
 
 function MinionListClass:AddSel()
 	if self.dest and not isValueInArray(self.dest.list, self.selValue) then
-		self.dest:Insert(self.selValue)
+		t_insert(self.dest.list, self.selValue)
 	end
 end
 
@@ -83,7 +85,7 @@ function MinionListClass:CanReceiveDrag(type, value)
 end
 
 function MinionListClass:ReceiveDrag(type, value, source)
-	self:Insert(self.selDragIndex or #self.list + 1, value)
+	t_insert(self.list, self.selDragIndex or #self.list + 1, value)
 end
 
 function MinionListClass:OnSelClick(index, minionId, doubleClick)
@@ -94,7 +96,7 @@ end
 
 function MinionListClass:OnSelDelete(index, minionId)
 	if not self.dest then
-		self:Remove(index)
+		t_remove(self.list, index)
 		self.selIndex = nil
 		self.selValue = nil
 	end

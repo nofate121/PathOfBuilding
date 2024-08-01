@@ -29,17 +29,6 @@ local MinionSearchListClass = newClass("MinionSearchListControl", "MinionListCon
 
 end)
 
-
-function MinionSearchListClass:Insert(pos, value)
-	t_insert(self.list, pos, value)
-	t_insert(self.unfilteredList, pos, value)
-end
-
-function MinionSearchListClass:Remove(pos)
-	t_remove(self.list, pos)
-	t_remove(self.unfilteredList, pos)
-end
-
 function MinionSearchListClass:DoesEntryMatchFilters(searchStr, minionId, filterMode)
 	if filterMode == 1 or filterMode == 3 then
 		local err, match = PCall(string.matchOrPattern, self.data.minions[minionId].name:lower(), searchStr)

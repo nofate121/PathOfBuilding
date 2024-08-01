@@ -422,11 +422,11 @@ function ListClass:OnKeyUp(key)
 			if self.selDragActive then
 				self.selDragActive = false
 				if self.selDragIndex and self.selDragIndex ~= self.selIndex then
-					self:Remove(self.selIndex)
+					t_remove(self.list, self.selIndex)
 					if self.selDragIndex > self.selIndex then
 						self.selDragIndex = self.selDragIndex - 1
 					end
-					self:Insert(self.selDragIndex, self.selValue)
+					t_insert(self.list, self.selDragIndex, self.selValue)
 					if self.OnOrderChange then
 						self:OnOrderChange(self.selIndex, self.selDragIndex)
 					end
@@ -473,12 +473,4 @@ function ListClass:GetHoverValue(key)
 			return value
 		end
 	end
-end
-
-function ListClass:Insert(pos, value)
-	t_insert(self.list, pos, value)
-end
-
-function ListClass:Remove(pos)
-	t_remove(self.list, pos)
 end
