@@ -252,37 +252,57 @@ function buildMode:Init(dbFileName, buildName, buildXML, convertBuild, importLin
 		if value == "^7^7New Loadout" then
 			local controls = { }
 			controls.label = new("LabelControl", nil, 0, 20, 0, 16, "^7Enter name for this loadout:")
-			controls.edit = new("EditControl", nil, 0, 40, 350, 20, "New Loadout", nil, nil, 100, function(buf)
+			controls.edit = new("EditControl", {"TOP",controls.label,"BOTTOM"}, 0, 4, 350, 20, "New Loadout", nil, nil, 100, function(buf)
 				controls.save.enabled = buf:match("%S")
 			end)
-			controls.save = new("ButtonControl", nil, -45, 70, 80, 20, "Save", function()
+
+			controls.checkCopy = new("CheckBoxControl", {"TOP",controls.edit,"BOTTOM"}, 0, 10, 20, "Copy Loadout", function(state) 
+				controls.loadoutList.enabled = state
+			end, "Create a copy of another Loadout", false)
+			controls.loadoutList = new("DropDownControl", {"LEFT",controls.checkCopy,"RIGHT"}, 8, 0, 190, 20, {}, nil)
+			controls.loadoutList.enabled = false
+			controls.checkCopy.x = (controls.checkCopy.width + 8 + controls.loadoutList.width) / -4
+			
+			local filteredList, treeList, itemList, skillList, configList = self:getLoadoutList()
+			controls.loadoutList:SetList(filteredList)
+
+			controls.save = new("ButtonControl", {"TOP",controls.edit,"BOTTOM"}, -45, 40, 80, 20, "Save", function()
 				local loadout = controls.edit.buf
 
-				local newSpec = new("PassiveSpec", self, latestTreeVersion)
-				newSpec.title = loadout
-				t_insert(self.treeTab.specList, newSpec)
+				if not controls.checkCopy.state then
+					-- create new loadout
+					local newSpec = new("PassiveSpec", self, latestTreeVersion)
+					newSpec.title = loadout
+					t_insert(self.treeTab.specList, newSpec)
 
-				local itemSet = self.itemsTab:NewItemSet(#self.itemsTab.itemSets + 1)
-				t_insert(self.itemsTab.itemSetOrderList, itemSet.id)
-				itemSet.title = loadout
+					local itemSet = self.itemsTab:NewItemSet(#self.itemsTab.itemSets + 1)
+					t_insert(self.itemsTab.itemSetOrderList, itemSet.id)
+					itemSet.title = loadout
 
-				local skillSet = self.skillsTab:NewSkillSet(#self.skillsTab.skillSets + 1)
-				t_insert(self.skillsTab.skillSetOrderList, skillSet.id)
-				skillSet.title = loadout
+					local skillSet = self.skillsTab:NewSkillSet(#self.skillsTab.skillSets + 1)
+					t_insert(self.skillsTab.skillSetOrderList, skillSet.id)
+					skillSet.title = loadout
 
-				local configSet = self.configTab:NewConfigSet(#self.configTab.configSets + 1)
-				t_insert(self.configTab.configSetOrderList, configSet.id)
-				configSet.title = loadout
+					local configSet = self.configTab:NewConfigSet(#self.configTab.configSets + 1)
+					t_insert(self.configTab.configSetOrderList, configSet.id)
+					configSet.title = loadout
+				else
+					-- copy loadout
+
+					self.copyloadout = {controls.loadoutList.selIndex, controls.loadoutList:GetSelValue(), loadout}
+					
+					
+				end
 
 				self:SyncLoadouts()
 				self.modFlag = true
 				main:ClosePopup()
 			end)
 			controls.save.enabled = false
-			controls.cancel = new("ButtonControl", nil, 45, 70, 80, 20, "Cancel", function()
+			controls.cancel = new("ButtonControl", {"TOP",controls.edit,"BOTTOM"}, 45, 40, 80, 20, "Cancel", function()
 				main:ClosePopup()
 			end)
-			main:OpenPopup(370, 100, "Set Name", controls, "save", "edit", "cancel")
+			main:OpenPopup(370, 130, "Set Name", controls, "save", "edit", "cancel")
 
 			self.controls.buildLoadouts:SetSel(1)
 			return
@@ -913,10 +933,8 @@ local function actExtra(act, extra)
 	return act > 2 and extra or 0
 end
 
-function buildMode:SyncLoadouts()
-	self.controls.buildLoadouts.list = {"No Loadouts"}
-
-	local filteredList = {"^7^7Loadouts:"}
+function buildMode:getLoadoutList()
+	local filteredList = {}
 	local treeList = {}
 	local itemList = {}
 	local skillList = {}
@@ -1001,8 +1019,15 @@ function buildMode:SyncLoadouts()
 			end
 		end
 	end
+	return filteredList, treeList, itemList, skillList, configList
+end
+
+function buildMode:SyncLoadouts()
+	self.controls.buildLoadouts.list = {"No Loadouts"}
+	local filteredList, treeList, itemList, skillList, configList = self:getLoadoutList()
 
 	-- giving the options unique formatting so it can not match with user-created sets
+	t_insert(filteredList, 1, "^7^7Loadouts:")
 	t_insert(filteredList, "^7^7-----")
 	t_insert(filteredList, "^7^7New Loadout")
 	t_insert(filteredList, "^7^7Sync")
@@ -1011,6 +1036,11 @@ function buildMode:SyncLoadouts()
 	if #filteredList > 0 then
 		self.controls.buildLoadouts.list = filteredList
 	end
+
+	
+	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
+	local oneItem = self.itemsTab and #self.itemsTab.itemSetOrderList == 1
+	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
 
 	-- Try to select loadout in dropdown based on currently selected tree
 	if self.treeTab then
@@ -1244,6 +1274,14 @@ function buildMode:ResetModFlags()
 end
 
 function buildMode:OnFrame(inputEvents)
+
+	if self.copyloadout and self.copyloadout ~= nil then
+		self:copyLoadout(self.copyloadout)
+		self.copyloadout = nil
+	end
+
+
+
 	-- Stop at drawing the background if the loaded build needs to be converted
 	if not self.targetVersion then
 		main:DrawBackground(main.viewPort)
@@ -2062,6 +2100,48 @@ function buildMode:SaveDBFile()
 	elseif action == "UPDATE" then
 		launch:ApplyUpdate(launch.updateAvailable)
 	end
+end
+
+function buildMode:copyLoadout(l)
+
+	local selectedLoadoutIndex = l[1]
+	local selectedLoadoutValue = l[2]
+	local loadout = l[3]
+
+	local filteredList, treeList, itemList, skillList, configList = self:getLoadoutList()
+
+	local selectedTree = treeList[selectedLoadoutIndex]
+	local selectedItem = itemList[selectedLoadoutIndex]
+	local selectedSkill = skillList[selectedLoadoutIndex]
+	local selectedConfig = configList[selectedLoadoutIndex]
+	
+	-- copy tree
+	local newSpec = new("PassiveSpec", self, selectedTree.treeVersion)
+	newSpec.title = loadout
+	newSpec.jewels = copyTable(selectedTree.jewels)
+	newSpec:RestoreUndoState(selectedTree:CreateUndoState())
+	newSpec:BuildClusterJewelGraphs()
+	t_insert(self.treeTab.specList, newSpec)
+
+	-- copy item
+	local itemSet = copyTable(selectedItem)
+	itemSet.id = 1
+	while itemList[itemSet.id] do
+		itemSet.id = itemSet.id + 1
+	end
+	self.itemsTab.itemSets[itemSet.id] = itemSet
+	itemSet.title = loadout
+	t_insert(self.itemsTab.itemSetOrderList, itemSet.id)
+
+	--copy skill
+	local skillSet = self.skillsTab:NewSkillSet(#self.skillsTab.skillSets + 1)
+	t_insert(self.skillsTab.skillSetOrderList, skillSet.id)
+	skillSet.title = loadout
+
+	-- copy config
+	local configSet = self.configTab:NewConfigSet(#self.configTab.configSets + 1)
+	t_insert(self.configTab.configSetOrderList, configSet.id)
+	configSet.title = loadout
 end
 
 return buildMode
