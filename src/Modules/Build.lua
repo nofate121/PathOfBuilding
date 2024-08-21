@@ -2141,6 +2141,11 @@ function buildMode:copyLoadout(loadoutToCopy, newLoadoutName, setNewLoadoutAsAct
 	local copySkill = self.skillsTab.skillSets[copySkillId]
 	local copyConfig = self.configTab.configSets[copyConfigId]
 	
+	local newSpecId = nil
+	local newItemId = nil
+	local newSkillId = nil
+	local newConfigId = nil
+	
 	-- copy tree
 	local newSpec = new("PassiveSpec", self, copySpec.treeVersion)
 	newSpec.title = newLoadoutName
@@ -2149,52 +2154,67 @@ function buildMode:copyLoadout(loadoutToCopy, newLoadoutName, setNewLoadoutAsAct
 	newSpec:BuildClusterJewelGraphs()
 	t_insert(self.treeTab.specList, newSpec)
 
+	newSpecId = #self.treeTab.specList
+
 	-- copy item
-	local newItem = copyTable(copyItem)
-	newItem.id = 1
-	while self.itemsTab.itemSets[newItem.id] do
-		newItem.id = newItem.id + 1
+	if not oneItem then
+		local newItem = copyTable(copyItem)
+		newItem.id = 1
+		while self.itemsTab.itemSets[newItem.id] do
+			newItem.id = newItem.id + 1
+		end
+		newItem.title = newLoadoutName
+		self.itemsTab.itemSets[newItem.id] = newItem
+		t_insert(self.itemsTab.itemSetOrderList, newItem.id)
+
+		newItemId = newItem.id
+	else
+		newItemId = copyItemId
 	end
-	newItem.title = newLoadoutName
-	self.itemsTab.itemSets[newItem.id] = newItem
-	t_insert(self.itemsTab.itemSetOrderList, newItem.id)
 
 	--copy skill
-	local newSkill = copyTable(copySkill, true)
-	newSkill.socketGroupList = { }
-	for socketGroupIndex, socketGroup in pairs(copySkill.socketGroupList) do
-		local newGroup = copyTable(socketGroup, true)
-		newGroup.gemList = { }
-		for gemIndex, gem in pairs(socketGroup.gemList) do
-			newGroup.gemList[gemIndex] = copyTable(gem, true)
+	if not oneSkill then
+		local newSkill = copyTable(copySkill, true)
+		newSkill.socketGroupList = { }
+		for socketGroupIndex, socketGroup in pairs(copySkill.socketGroupList) do
+			local newGroup = copyTable(socketGroup, true)
+			newGroup.gemList = { }
+			for gemIndex, gem in pairs(socketGroup.gemList) do
+				newGroup.gemList[gemIndex] = copyTable(gem, true)
+			end
+			t_insert(newSkill.socketGroupList, newGroup)
 		end
-		t_insert(newSkill.socketGroupList, newGroup)
+		newSkill.id = 1
+		while self.skillsTab.skillSets[newSkill.id] do
+			newSkill.id = newSkill.id + 1
+		end
+		self.skillsTab.skillSets[newSkill.id] = newSkill
+		newSkill.title = newLoadoutName
+		t_insert(self.skillsTab.skillSetOrderList, newSkill.id)
+		
+		newSkillId = newSkill.id
+	else
+		newSkillId = copySkillId
 	end
-	newSkill.id = 1
-	while self.skillsTab.skillSets[newSkill.id] do
-		newSkill.id = newSkill.id + 1
-	end
-	self.skillsTab.skillSets[newSkill.id] = newSkill
-	newSkill.title = newLoadoutName
-	t_insert(self.skillsTab.skillSetOrderList, newSkill.id)
 
 	-- copy config
-	local newConfig = copyTable(copyConfig)
-	newConfig.id = 1
-	while self.configTab.configSets[newConfig.id] do
-		newConfig.id = newConfig.id + 1
+	if not oneConfig then
+		local newConfig = copyTable(copyConfig)
+		newConfig.id = 1
+		while self.configTab.configSets[newConfig.id] do
+			newConfig.id = newConfig.id + 1
+		end
+		self.configTab.configSets[newConfig.id] = newConfig
+		newConfig.title = newLoadoutName
+		t_insert(self.configTab.configSetOrderList, newConfig.id)
+
+		newConfigId = newConfig.id
+	else
+		newConfigId = copyConfigId
 	end
-	self.configTab.configSets[newConfig.id] = newConfig
-	newConfig.title = newLoadoutName
-	t_insert(self.configTab.configSetOrderList, newConfig.id)
 
 
 	if setNewLoadoutAsActive then
-
-		local newSpecId = #self.treeTab.specList
-		local newItemId = newItem.id
-		local newSkillId = newSkill.id
-		local newConfigId = newConfig.id
 
 		if newSpecId ~= self.treeTab.activeSpec then
 			self.treeTab:SetActiveSpec(newSpecId)
