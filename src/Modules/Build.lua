@@ -263,14 +263,21 @@ function buildMode:Init(dbFileName, buildName, buildXML, convertBuild, importLin
 			controls.loadoutList.enabled = false
 			controls.checkCopy.x = (controls.checkCopy.width + 8 + controls.loadoutList.width) / -4
 			
-			local filteredList, treeList, itemList, skillList, configList = self:getLoadoutList()
-			controls.loadoutList:SetList(filteredList)
+			local loadoutList = {}
+			local prefix = "^7^7"
+			for _, v in pairs(self.controls.buildLoadouts.list) do
+				if string.sub(v, 1, string.len(prefix)) ~= prefix then
+					t_insert(loadoutList, v)
+				end
+			end
+			controls.loadoutList:SetList(loadoutList)
 
 			controls.save = new("ButtonControl", {"TOP",controls.edit,"BOTTOM"}, -45, 40, 80, 20, "Save", function()
 				local loadout = controls.edit.buf
 
 				if not controls.checkCopy.state then
 					-- create new loadout
+
 					local newSpec = new("PassiveSpec", self, latestTreeVersion)
 					newSpec.title = loadout
 					t_insert(self.treeTab.specList, newSpec)
@@ -287,12 +294,8 @@ function buildMode:Init(dbFileName, buildName, buildXML, convertBuild, importLin
 					t_insert(self.configTab.configSetOrderList, configSet.id)
 					configSet.title = loadout
 				else
-					-- copy loadout
-
-					--self.copyloadout = {controls.loadoutList.selIndex, controls.loadoutList:GetSelValue(), loadout}
-					
-					self:copyLoadout({controls.loadoutList.selIndex, controls.loadoutList:GetSelValue(), loadout})
-					
+					-- copy loadout			
+					self:copyLoadout(controls.loadoutList:GetSelValue(), loadout, true)
 				end
 
 				self:SyncLoadouts()
@@ -934,8 +937,10 @@ local function actExtra(act, extra)
 	return act > 2 and extra or 0
 end
 
-function buildMode:getLoadoutList()
-	local filteredList = {}
+function buildMode:SyncLoadouts()
+	self.controls.buildLoadouts.list = {"No Loadouts"}
+
+	local filteredList = {"^7^7Loadouts:"}
 	local treeList = {}
 	local itemList = {}
 	local skillList = {}
@@ -1020,15 +1025,8 @@ function buildMode:getLoadoutList()
 			end
 		end
 	end
-	return filteredList, treeList, itemList, skillList, configList
-end
-
-function buildMode:SyncLoadouts()
-	self.controls.buildLoadouts.list = {"No Loadouts"}
-	local filteredList, treeList, itemList, skillList, configList = self:getLoadoutList()
 
 	-- giving the options unique formatting so it can not match with user-created sets
-	t_insert(filteredList, 1, "^7^7Loadouts:")
 	t_insert(filteredList, "^7^7-----")
 	t_insert(filteredList, "^7^7New Loadout")
 	t_insert(filteredList, "^7^7Sync")
@@ -1037,11 +1035,6 @@ function buildMode:SyncLoadouts()
 	if #filteredList > 0 then
 		self.controls.buildLoadouts.list = filteredList
 	end
-
-	
-	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
-	local oneItem = self.itemsTab and #self.itemsTab.itemSetOrderList == 1
-	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
 
 	-- Try to select loadout in dropdown based on currently selected tree
 	if self.treeTab then
@@ -1275,17 +1268,6 @@ function buildMode:ResetModFlags()
 end
 
 function buildMode:OnFrame(inputEvents)
-
-	--self.copyloadout = nil
-
-	if self.copyloadout and self.copyloadout ~= nil then
-		self.copyloadout = {self.controls.buildLoadouts.selIndex, self.controls.buildLoadouts:GetSelValue(), "newcopy"}
-		self:copyLoadout(self.copyloadout)
-		self.copyloadout = nil
-	end
-
-
-
 	-- Stop at drawing the background if the loaded build needs to be converted
 	if not self.targetVersion then
 		main:DrawBackground(main.viewPort)
@@ -2106,14 +2088,7 @@ function buildMode:SaveDBFile()
 	end
 end
 
-function buildMode:copyLoadout(l)
-
-	local selectedLoadoutIndex = l[1]
-	local selectedLoadoutValue = l[2]
-	local loadout = l[3]
-	local value = selectedLoadoutValue
-
-	--local filteredList, treeList, itemList, skillList, configList = self:getLoadoutList()
+function buildMode:copyLoadout(loadoutToCopy, newLoadoutName, setNewLoadoutAsActive)
 
 	-- item, skill, and config sets have identical structure
 		-- return id as soon as it's found
@@ -2151,10 +2126,10 @@ function buildMode:copyLoadout(l)
 	local oneItem = self.itemsTab and #self.itemsTab.itemSetOrderList == 1
 	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
 
-	local copySpecId = findNamedSetId(self.treeTab:GetSpecList(), value, self.treeListSpecialLinks)
-	local copyItemId = oneItem and 1 or findSetId(self.itemsTab.itemSetOrderList, value, self.itemsTab.itemSets, self.itemListSpecialLinks)
-	local copySkillId = oneSkill and 1 or findSetId(self.skillsTab.skillSetOrderList, value, self.skillsTab.skillSets, self.skillListSpecialLinks)
-	local copyConfigId = oneConfig and 1 or findSetId(self.configTab.configSetOrderList, value, self.configTab.configSets, self.configListSpecialLinks)
+	local copySpecId = findNamedSetId(self.treeTab:GetSpecList(), loadoutToCopy, self.treeListSpecialLinks)
+	local copyItemId = oneItem and 1 or findSetId(self.itemsTab.itemSetOrderList, loadoutToCopy, self.itemsTab.itemSets, self.itemListSpecialLinks)
+	local copySkillId = oneSkill and 1 or findSetId(self.skillsTab.skillSetOrderList, loadoutToCopy, self.skillsTab.skillSets, self.skillListSpecialLinks)
+	local copyConfigId = oneConfig and 1 or findSetId(self.configTab.configSetOrderList, loadoutToCopy, self.configTab.configSets, self.configListSpecialLinks)
 
 	-- if exact match nor special grouping cannot find setIds, bail
 	if copySpecId == nil or copyItemId == nil or copySkillId == nil or copyConfigId == nil then
@@ -2165,12 +2140,10 @@ function buildMode:copyLoadout(l)
 	local copyItem = self.itemsTab.itemSets[copyItemId]
 	local copySkill = self.skillsTab.skillSets[copySkillId]
 	local copyConfig = self.configTab.configSets[copyConfigId]
-
-
 	
 	-- copy tree
 	local newSpec = new("PassiveSpec", self, copySpec.treeVersion)
-	newSpec.title = loadout
+	newSpec.title = newLoadoutName
 	newSpec.jewels = copyTable(copySpec.jewels)
 	newSpec:RestoreUndoState(copySpec:CreateUndoState())
 	newSpec:BuildClusterJewelGraphs()
@@ -2182,19 +2155,38 @@ function buildMode:copyLoadout(l)
 	while self.itemsTab.itemSets[newItem.id] do
 		newItem.id = newItem.id + 1
 	end
-	newItem.title = loadout
+	newItem.title = newLoadoutName
 	self.itemsTab.itemSets[newItem.id] = newItem
 	t_insert(self.itemsTab.itemSetOrderList, newItem.id)
 
 	--copy skill
-	local skillSet = self.skillsTab:NewSkillSet(#self.skillsTab.skillSets + 1)
-	t_insert(self.skillsTab.skillSetOrderList, skillSet.id)
-	skillSet.title = loadout
+	local newSkill = copyTable(copySkill, true)
+	newSkill.socketGroupList = { }
+	for socketGroupIndex, socketGroup in pairs(skillSet.socketGroupList) do
+		local newGroup = copyTable(socketGroup, true)
+		newGroup.gemList = { }
+		for gemIndex, gem in pairs(socketGroup.gemList) do
+			newGroup.gemList[gemIndex] = copyTable(gem, true)
+		end
+		t_insert(newSkill.socketGroupList, newGroup)
+	end
+	newSkill.id = 1
+	while self.skillsTab.skillSets[newSkill.id] do
+		newSkill.id = newSkill.id + 1
+	end
+	self.skillsTab.skillSets[newSkill.id] = newSkill
+	skillSet.title = newLoadoutName
+	t_insert(self.skillsTab.skillSetOrderList, newSkill.id)
 
 	-- copy config
-	local configSet = self.configTab:NewConfigSet(#self.configTab.configSets + 1)
+	local newConfig = copyTable(copyConfig)
+	newConfig.id = 1
+	while self.configTab.configSets[newConfig.id] do
+		newConfig.id = newConfig.id + 1
+	end
+	self.configTab.configSets[newConfig.id] = newConfig
+	configSet.title = newLoadoutName
 	t_insert(self.configTab.configSetOrderList, configSet.id)
-	configSet.title = loadout
 
 
 	local newSpecId = #self.treeTab.specList
@@ -2216,7 +2208,7 @@ function buildMode:copyLoadout(l)
 		self.configTab:SetActiveConfigSet(newConfigId)
 	end
 
-	self.controls.buildLoadouts:SelByValue(value)
+	self.controls.buildLoadouts:SelByValue(loadoutToCopy)
 
 end
 
