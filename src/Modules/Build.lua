@@ -2162,7 +2162,7 @@ function buildMode:copyLoadout(loadoutToCopy, newLoadoutName, setNewLoadoutAsAct
 	--copy skill
 	local newSkill = copyTable(copySkill, true)
 	newSkill.socketGroupList = { }
-	for socketGroupIndex, socketGroup in pairs(skillSet.socketGroupList) do
+	for socketGroupIndex, socketGroup in pairs(copySkill.socketGroupList) do
 		local newGroup = copyTable(socketGroup, true)
 		newGroup.gemList = { }
 		for gemIndex, gem in pairs(socketGroup.gemList) do
@@ -2175,7 +2175,7 @@ function buildMode:copyLoadout(loadoutToCopy, newLoadoutName, setNewLoadoutAsAct
 		newSkill.id = newSkill.id + 1
 	end
 	self.skillsTab.skillSets[newSkill.id] = newSkill
-	skillSet.title = newLoadoutName
+	newSkill.title = newLoadoutName
 	t_insert(self.skillsTab.skillSetOrderList, newSkill.id)
 
 	-- copy config
@@ -2185,30 +2185,34 @@ function buildMode:copyLoadout(loadoutToCopy, newLoadoutName, setNewLoadoutAsAct
 		newConfig.id = newConfig.id + 1
 	end
 	self.configTab.configSets[newConfig.id] = newConfig
-	configSet.title = newLoadoutName
-	t_insert(self.configTab.configSetOrderList, configSet.id)
+	newConfig.title = newLoadoutName
+	t_insert(self.configTab.configSetOrderList, newConfig.id)
 
 
-	local newSpecId = #self.treeTab.specList
-	local newItemId = newItem.id
-	local newSkillId = skillSet.id
-	local newConfigId = configSet.id
+	if setNewLoadoutAsActive then
 
+		local newSpecId = #self.treeTab.specList
+		local newItemId = newItem.id
+		local newSkillId = newSkill.id
+		local newConfigId = newConfig.id
 
-	if newSpecId ~= self.treeTab.activeSpec then
-		self.treeTab:SetActiveSpec(newSpecId)
+		if newSpecId ~= self.treeTab.activeSpec then
+			self.treeTab:SetActiveSpec(newSpecId)
+		end
+		if newItemId ~= self.itemsTab.activeItemSetId then
+			self.itemsTab:SetActiveItemSet(newItemId)
+		end
+		if newSkillId ~= self.skillsTab.activeSkillSetId then
+			self.skillsTab:SetActiveSkillSet(newSkillId)
+		end
+		if newConfigId ~= self.configTab.activeConfigSetId then
+			self.configTab:SetActiveConfigSet(newConfigId)
+		end
+		
+		--self.controls.buildLoadouts:SelByValue(loadoutToCopy)
+
 	end
-	if newItemId ~= self.itemsTab.activeItemSetId then
-		self.itemsTab:SetActiveItemSet(newItemId)
-	end
-	if newSkillId ~= self.skillsTab.activeSkillSetId then
-		self.skillsTab:SetActiveSkillSet(newSkillId)
-	end
-	if newConfigId ~= self.configTab.activeConfigSetId then
-		self.configTab:SetActiveConfigSet(newConfigId)
-	end
 
-	self.controls.buildLoadouts:SelByValue(loadoutToCopy)
 
 end
 
