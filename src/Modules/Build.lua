@@ -289,8 +289,9 @@ function buildMode:Init(dbFileName, buildName, buildXML, convertBuild, importLin
 				else
 					-- copy loadout
 
-					self.copyloadout = {controls.loadoutList.selIndex, controls.loadoutList:GetSelValue(), loadout}
+					--self.copyloadout = {controls.loadoutList.selIndex, controls.loadoutList:GetSelValue(), loadout}
 					
+					self:copyLoadout({controls.loadoutList.selIndex, controls.loadoutList:GetSelValue(), loadout})
 					
 				end
 
@@ -1275,7 +1276,10 @@ end
 
 function buildMode:OnFrame(inputEvents)
 
+	--self.copyloadout = nil
+
 	if self.copyloadout and self.copyloadout ~= nil then
+		self.copyloadout = {self.controls.buildLoadouts.selIndex, self.controls.buildLoadouts:GetSelValue(), "newcopy"}
 		self:copyLoadout(self.copyloadout)
 		self.copyloadout = nil
 	end
@@ -2107,31 +2111,80 @@ function buildMode:copyLoadout(l)
 	local selectedLoadoutIndex = l[1]
 	local selectedLoadoutValue = l[2]
 	local loadout = l[3]
+	local value = selectedLoadoutValue
 
-	local filteredList, treeList, itemList, skillList, configList = self:getLoadoutList()
+	--local filteredList, treeList, itemList, skillList, configList = self:getLoadoutList()
 
-	local selectedTree = treeList[selectedLoadoutIndex]
-	local selectedItem = itemList[selectedLoadoutIndex]
-	local selectedSkill = skillList[selectedLoadoutIndex]
-	local selectedConfig = configList[selectedLoadoutIndex]
+	-- item, skill, and config sets have identical structure
+		-- return id as soon as it's found
+	local function findSetId(setOrderList, value, sets, setSpecialLinks)
+		for _, setOrder in ipairs(setOrderList) do
+			if value == (sets[setOrder].title or "Default") then
+				return setOrder
+			else
+				local linkMatch = string.match(value, "%{(%w+)%}")
+				if linkMatch then
+					return setSpecialLinks[linkMatch]["setId"]
+				end
+			end
+		end
+		return nil
+	end
+
+	-- trees have a different structure with id/name pairs
+	-- return id as soon as it's found
+	local function findNamedSetId(treeList, value, setSpecialLinks)
+		for id, spec in ipairs(treeList) do
+			if value == spec then
+				return id
+			else
+				local linkMatch = string.match(value, "%{(%w+)%}")
+				if linkMatch then
+					return setSpecialLinks[linkMatch]["setId"]
+				end
+			end
+		end
+		return nil
+	end
+
+	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
+	local oneItem = self.itemsTab and #self.itemsTab.itemSetOrderList == 1
+	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
+
+	local copySpecId = findNamedSetId(self.treeTab:GetSpecList(), value, self.treeListSpecialLinks)
+	local copyItemId = oneItem and 1 or findSetId(self.itemsTab.itemSetOrderList, value, self.itemsTab.itemSets, self.itemListSpecialLinks)
+	local copySkillId = oneSkill and 1 or findSetId(self.skillsTab.skillSetOrderList, value, self.skillsTab.skillSets, self.skillListSpecialLinks)
+	local copyConfigId = oneConfig and 1 or findSetId(self.configTab.configSetOrderList, value, self.configTab.configSets, self.configListSpecialLinks)
+
+	-- if exact match nor special grouping cannot find setIds, bail
+	if copySpecId == nil or copyItemId == nil or copySkillId == nil or copyConfigId == nil then
+		return
+	end
+
+	local copySpec = self.treeTab.specList[copySpecId]
+	local copyItem = self.itemsTab.itemSets[copyItemId]
+	local copySkill = self.skillsTab.skillSets[copySkillId]
+	local copyConfig = self.configTab.configSets[copyConfigId]
+
+
 	
 	-- copy tree
-	local newSpec = new("PassiveSpec", self, selectedTree.treeVersion)
+	local newSpec = new("PassiveSpec", self, copySpec.treeVersion)
 	newSpec.title = loadout
-	newSpec.jewels = copyTable(selectedTree.jewels)
-	newSpec:RestoreUndoState(selectedTree:CreateUndoState())
+	newSpec.jewels = copyTable(copySpec.jewels)
+	newSpec:RestoreUndoState(copySpec:CreateUndoState())
 	newSpec:BuildClusterJewelGraphs()
 	t_insert(self.treeTab.specList, newSpec)
 
 	-- copy item
-	local itemSet = copyTable(selectedItem)
-	itemSet.id = 1
-	while itemList[itemSet.id] do
-		itemSet.id = itemSet.id + 1
+	local newItem = copyTable(copyItem)
+	newItem.id = 1
+	while self.itemsTab.itemSets[newItem.id] do
+		newItem.id = newItem.id + 1
 	end
-	self.itemsTab.itemSets[itemSet.id] = itemSet
-	itemSet.title = loadout
-	t_insert(self.itemsTab.itemSetOrderList, itemSet.id)
+	newItem.title = loadout
+	self.itemsTab.itemSets[newItem.id] = newItem
+	t_insert(self.itemsTab.itemSetOrderList, newItem.id)
 
 	--copy skill
 	local skillSet = self.skillsTab:NewSkillSet(#self.skillsTab.skillSets + 1)
@@ -2142,6 +2195,29 @@ function buildMode:copyLoadout(l)
 	local configSet = self.configTab:NewConfigSet(#self.configTab.configSets + 1)
 	t_insert(self.configTab.configSetOrderList, configSet.id)
 	configSet.title = loadout
+
+
+	local newSpecId = #self.treeTab.specList
+	local newItemId = newItem.id
+	local newSkillId = skillSet.id
+	local newConfigId = configSet.id
+
+
+	if newSpecId ~= self.treeTab.activeSpec then
+		self.treeTab:SetActiveSpec(newSpecId)
+	end
+	if newItemId ~= self.itemsTab.activeItemSetId then
+		self.itemsTab:SetActiveItemSet(newItemId)
+	end
+	if newSkillId ~= self.skillsTab.activeSkillSetId then
+		self.skillsTab:SetActiveSkillSet(newSkillId)
+	end
+	if newConfigId ~= self.configTab.activeConfigSetId then
+		self.configTab:SetActiveConfigSet(newConfigId)
+	end
+
+	self.controls.buildLoadouts:SelByValue(value)
+
 end
 
 return buildMode
