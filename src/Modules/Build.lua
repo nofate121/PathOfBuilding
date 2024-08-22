@@ -2147,49 +2147,24 @@ function buildMode:copyLoadout(loadoutToCopy, newLoadoutName, setNewLoadoutAsAct
 	local newConfigId = nil
 	
 	-- copy tree
-	local newSpec = new("PassiveSpec", self, copySpec.treeVersion)
-	newSpec.title = newLoadoutName
-	newSpec.jewels = copyTable(copySpec.jewels)
-	newSpec:RestoreUndoState(copySpec:CreateUndoState())
-	newSpec:BuildClusterJewelGraphs()
+	local newSpec = self.treeTab:CopySpec(copySpecId, newLoadoutName)
 	t_insert(self.treeTab.specList, newSpec)
 
 	newSpecId = #self.treeTab.specList
 
 	-- copy item
 	if not oneItem then
-		local newItem = copyTable(copyItem)
-		newItem.id = 1
-		while self.itemsTab.itemSets[newItem.id] do
-			newItem.id = newItem.id + 1
-		end
-		newItem.title = newLoadoutName
-		self.itemsTab.itemSets[newItem.id] = newItem
-		t_insert(self.itemsTab.itemSetOrderList, newItem.id)
+		local newItemSet = self.itemsTab:CopyItemSet(copyItemId, newLoadoutName)
+		t_insert(self.itemsTab.itemSetOrderList, newItemSet.id)
 
-		newItemId = newItem.id
+		newItemId = newItemSet.id
 	else
 		newItemId = copyItemId
 	end
 
 	--copy skill
 	if not oneSkill then
-		local newSkill = copyTable(copySkill, true)
-		newSkill.socketGroupList = { }
-		for socketGroupIndex, socketGroup in pairs(copySkill.socketGroupList) do
-			local newGroup = copyTable(socketGroup, true)
-			newGroup.gemList = { }
-			for gemIndex, gem in pairs(socketGroup.gemList) do
-				newGroup.gemList[gemIndex] = copyTable(gem, true)
-			end
-			t_insert(newSkill.socketGroupList, newGroup)
-		end
-		newSkill.id = 1
-		while self.skillsTab.skillSets[newSkill.id] do
-			newSkill.id = newSkill.id + 1
-		end
-		self.skillsTab.skillSets[newSkill.id] = newSkill
-		newSkill.title = newLoadoutName
+		local newSkill = self.skillsTab:CopySkillSet(copySkillId, newLoadoutName)
 		t_insert(self.skillsTab.skillSetOrderList, newSkill.id)
 		
 		newSkillId = newSkill.id
@@ -2199,13 +2174,7 @@ function buildMode:copyLoadout(loadoutToCopy, newLoadoutName, setNewLoadoutAsAct
 
 	-- copy config
 	if not oneConfig then
-		local newConfig = copyTable(copyConfig)
-		newConfig.id = 1
-		while self.configTab.configSets[newConfig.id] do
-			newConfig.id = newConfig.id + 1
-		end
-		self.configTab.configSets[newConfig.id] = newConfig
-		newConfig.title = newLoadoutName
+		local newConfig = self.configTab:CopyConfigSet(copyConfigId, newLoadoutName)
 		t_insert(self.configTab.configSetOrderList, newConfig.id)
 
 		newConfigId = newConfig.id

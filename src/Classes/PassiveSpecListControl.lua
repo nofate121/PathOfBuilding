@@ -11,11 +11,7 @@ local PassiveSpecListClass = newClass("PassiveSpecListControl", "ListControl", f
 	self.ListControl(anchor, x, y, width, height, 16, "VERTICAL", true, treeTab.specList)
 	self.treeTab = treeTab
 	self.controls.copy = new("ButtonControl", {"BOTTOMLEFT",self,"TOP"}, 2, -4, 60, 18, "Copy", function()
-		local newSpec = new("PassiveSpec", treeTab.build, self.selValue.treeVersion)
-		newSpec.title = self.selValue.title
-		newSpec.jewels = copyTable(self.selValue.jewels)
-		newSpec:RestoreUndoState(self.selValue:CreateUndoState())
-		newSpec:BuildClusterJewelGraphs()
+		local newSpec = treeTab:CopySpec(self.selIndex)
 		self:RenameSpec(newSpec, "Copy Tree", true)
 	end)
 	self.controls.copy.enabled = function()
@@ -34,10 +30,7 @@ local PassiveSpecListClass = newClass("PassiveSpecListControl", "ListControl", f
 		return self.selValue ~= nil
 	end
 	self.controls.new = new("ButtonControl", {"RIGHT",self.controls.rename,"LEFT"}, -4, 0, 60, 18, "New", function()
-		local newSpec = new("PassiveSpec", treeTab.build, latestTreeVersion)
-		newSpec:SelectClass(treeTab.build.spec.curClassId)
-		newSpec:SelectAscendClass(treeTab.build.spec.curAscendClassId)
-		newSpec:SelectSecondaryAscendClass(treeTab.build.spec.curSecondaryAscendClassId)
+		local newSpec = treeTab:NewSpec()
 		self:RenameSpec(newSpec, "New Tree", true)
 	end)
 	self:UpdateItemsTabPassiveTreeDropdown()

@@ -437,6 +437,30 @@ function TreeTabClass:Save(xml)
 	end
 end
 
+-- Creates a new spec
+function TreeTabClass:NewSpec()
+	local newSpec = new("PassiveSpec", self.build, latestTreeVersion)
+	newSpec:SelectClass(self.build.spec.curClassId)
+	newSpec:SelectAscendClass(self.build.spec.curAscendClassId)
+	newSpec:SelectSecondaryAscendClass(self.build.spec.curSecondaryAscendClassId)
+	return newSpec
+end
+
+-- Creates a copy of a spec
+function TreeTabClass:CopySpec(specIdToCopy, newTitle)
+	local copySpec = self.specList[specIdToCopy]
+	local newSpec = new("PassiveSpec", self.build, copySpec.treeVersion)
+	if newTitle then
+		newSpec.title = newTitle
+	else
+		newSpec.title = copySpec.title
+	end
+	newSpec.jewels = copyTable(copySpec.jewels)
+	newSpec:RestoreUndoState(copySpec:CreateUndoState())
+	newSpec:BuildClusterJewelGraphs()
+	return newSpec
+end
+
 function TreeTabClass:SetActiveSpec(specId)
 	local prevSpec = self.build.spec
 	self.activeSpec = m_min(specId, #self.specList)

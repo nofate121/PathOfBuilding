@@ -1265,6 +1265,21 @@ function ItemsTabClass:NewItemSet(itemSetId)
 	return itemSet
 end
 
+-- Creates a copy of another item set
+function ItemsTabClass:CopyItemSet(itemSetIdToCopy, newTitle)
+	local copyItemSet = self.itemSets[itemSetIdToCopy]
+	local newItemSet = copyTable(copyItemSet)
+	newItemSet.id = 1
+	while self.itemSets[newItemSet.id] do
+		newItemSet.id = newItemSet.id + 1
+	end
+	if newTitle then
+		newItemSet.title = newTitle
+	end
+	self.itemSets[newItemSet.id] = newItemSet
+	return newItemSet
+end
+
 -- Changes the active item set
 function ItemsTabClass:SetActiveItemSet(itemSetId)
 	local prevSet = self.activeItemSet

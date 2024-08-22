@@ -965,6 +965,21 @@ function ConfigTabClass:NewConfigSet(configSetId, title)
 	return configSet
 end
 
+-- Creates a copy of a config set
+function ConfigTabClass:CopyConfigSet(configSetIdToCopy, newTitle)
+	local copyConfigSet = self.configSets[configSetIdToCopy]
+	local newConfigSet = copyTable(copyConfigSet)
+	newConfigSet.id = 1
+	while self.configSets[newConfigSet.id] do
+		newConfigSet.id = newConfigSet.id + 1
+	end
+	if newTitle then
+		newConfigSet.title = newTitle
+	end
+	self.configSets[newConfigSet.id] = newConfigSet
+	return newConfigSet
+end
+
 -- Changes the active config set
 function ConfigTabClass:SetActiveConfigSet(configSetId, init)
 	-- Initialize config sets if needed

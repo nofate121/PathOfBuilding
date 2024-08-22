@@ -1324,6 +1324,30 @@ function SkillsTabClass:NewSkillSet(skillSetId)
 	return skillSet
 end
 
+-- Creates a copy of a skill set
+function SkillsTabClass:CopySkillSet(skillSetIdToCopy, newTitle)
+	local copySkillSet = self.skillSets[skillSetIdToCopy]
+	local newSkillSet = copyTable(copySkillSet, true)
+	newSkillSet.socketGroupList = { }
+	for socketGroupIndex, socketGroup in pairs(copySkillSet.socketGroupList) do
+		local newGroup = copyTable(socketGroup, true)
+		newGroup.gemList = { }
+		for gemIndex, gem in pairs(socketGroup.gemList) do
+			newGroup.gemList[gemIndex] = copyTable(gem, true)
+		end
+		t_insert(newSkillSet.socketGroupList, newGroup)
+	end
+	newSkillSet.id = 1
+	while self.skillSets[newSkillSet.id] do
+		newSkillSet.id = newSkillSet.id + 1
+	end
+	if newTitle then
+		newSkillSet.title = newTitle
+	end
+	self.skillSets[newSkillSet.id] = newSkillSet
+	return newSkillSet
+end
+
 -- Changes the active skill set
 function SkillsTabClass:SetActiveSkillSet(skillSetId)
 	-- Initialize skill sets if needed
