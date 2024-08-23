@@ -9,7 +9,7 @@ local m_max = math.max
 
 local LoadoutListControlClass = newClass("LoadoutListControl", "ListControl", function(self, anchor, x, y, width, height, build)
 	local loadoutlist = build:GetLoadoutList()
-	self.ListControl(anchor, x, y, width, height, 16, "VERTICAL", true, loadoutlist)
+	self.ListControl(anchor, x, y, width, height, 16, "VERTICAL", false, loadoutlist)
 	self.build = build
 	self.controls.copy = new("ButtonControl", {"BOTTOM",self,"TOP"}, 0, -4, 60, 18, "Copy", function()
 		local newLoadout = self.build:CopyLoadout(self.selIndex)

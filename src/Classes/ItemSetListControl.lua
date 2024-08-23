@@ -115,14 +115,9 @@ function ItemSetListClass:OnSelDelete(index, itemSetId)
 	local itemSet = self.itemsTab.itemSets[itemSetId]
 	if #self.list > 1 then
 		main:OpenConfirmPopup("Delete Item Set", "Are you sure you want to delete '"..(itemSet.title or "Default").."'?\nThis will not delete any items used by the set.", "Delete", function()
-			t_remove(self.list, index)
-			self.itemsTab.itemSets[itemSetId] = nil
 			self.selIndex = nil
 			self.selValue = nil
-			if itemSetId == self.itemsTab.activeItemSetId then 
-				self.itemsTab:SetActiveItemSet(self.list[m_max(1, index - 1)])
-			end
-			self.itemsTab:AddUndoState()
+			self.itemsTab:DeleteItemSet(itemSetId)
 			self.itemsTab.build:SyncLoadouts()
 		end)
 	end

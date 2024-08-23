@@ -1280,6 +1280,16 @@ function ItemsTabClass:CopyItemSet(itemSetIdToCopy, newTitle)
 	return newItemSet
 end
 
+function ItemsTabClass:DeleteItemSet(itemSetId)
+	local index = isValueInArray(self.itemSetOrderList, itemSetId)
+	t_remove(self.itemSetOrderList, index)
+	self.itemSets[itemSetId] = nil
+	if itemSetId == self.activeItemSetId then
+		self:SetActiveItemSet(self.itemSetOrderList[m_max(1, index - 1)])
+	end
+	self:AddUndoState()
+end
+
 -- Changes the active item set
 function ItemsTabClass:SetActiveItemSet(itemSetId)
 	local prevSet = self.activeItemSet

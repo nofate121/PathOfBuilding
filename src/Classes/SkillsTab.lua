@@ -1348,6 +1348,16 @@ function SkillsTabClass:CopySkillSet(skillSetIdToCopy, newTitle)
 	return newSkillSet
 end
 
+function SkillsTabClass:DeleteSkillSet(skillSetId)
+	local index = isValueInArray(self.skillSetOrderList, skillSetId)
+	t_remove(self.skillSetOrderList, index)
+	self.skillSets[skillSetId] = nil
+	if skillSetId == self.activeSkillSetId then
+		self:SetActiveSkillSet(self.skillSetOrderList[m_max(1, index - 1)])
+	end
+	self:AddUndoState()
+end
+
 -- Changes the active skill set
 function SkillsTabClass:SetActiveSkillSet(skillSetId)
 	-- Initialize skill sets if needed
