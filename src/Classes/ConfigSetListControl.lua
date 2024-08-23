@@ -84,14 +84,9 @@ function ConfigSetListClass:OnSelDelete(index, configSetId)
 	local configSet = self.configTab.configSets[configSetId]
 	if #self.list > 1 then
 		main:OpenConfirmPopup("Delete Config Set", "Are you sure you want to delete '"..(configSet.title or "Default").."'?", "Delete", function()
-			t_remove(self.list, index)
-			self.configTab.configSets[configSetId] = nil
 			self.selIndex = nil
 			self.selValue = nil
-			if configSetId == self.configTab.activeConfigSetId then
-				self.configTab:SetActiveConfigSet(self.list[m_max(1, index - 1)])
-			end
-			self.configTab:AddUndoState()
+			self.configTab:DeleteConfigSet(configSetId)
 			self.configTab.build:SyncLoadouts()
 		end)
 	end

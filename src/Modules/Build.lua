@@ -2212,6 +2212,7 @@ function buildMode:DeleteLoadout(loadout)
 	self.treeTab:DeleteSpec(newSpecId)
 	self.itemsTab:DeleteItemSet(newItemId)
 	self.skillsTab:DeleteSkillSet(newSkillId)
+	self.configTab:DeleteConfigSet(newConfigId)
 
 
 	return true
