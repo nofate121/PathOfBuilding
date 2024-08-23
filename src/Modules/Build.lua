@@ -2238,29 +2238,23 @@ function buildMode:DeleteLoadout(loadout)
 
 	self.treeTab:DeleteSpec(specId)
 
-	-- delete sets if not the only one, if set is not exclusive (it is shared) rename it instead
-	if not oneItem then
-		if isExclusiveSet(itemSetId, self.itemListSpecialLinks) then
-			-- delete
-			self.itemsTab:DeleteItemSet(itemSetId)
-		else 
-			-- rename
-			itemSet.title = replaceSetId(itemSet.title, linkIdentifier)
-		end
+	-- delete sets if it is not the only set of that type and is exclusive, otherwise (it is shared) rename it instead
+	if not oneItem and isExclusiveSet(itemSetId, self.itemListSpecialLinks) then
+		-- delete
+		self.itemsTab:DeleteItemSet(itemSetId)
+	else 
+		-- rename
+		itemSet.title = replaceSetId(itemSet.title, linkIdentifier)
 	end
-	if not oneSkill then
-		if isExclusiveSet(skillSetId, self.skillListSpecialLinks) then
-			self.skillsTab:DeleteSkillSet(skillSetId)
-		else 
-			skillSet.title = replaceSetId(skillSet.title, linkIdentifier)
-		end
+	if not oneSkill and isExclusiveSet(skillSetId, self.skillListSpecialLinks) then
+		self.skillsTab:DeleteSkillSet(skillSetId)
+	else 
+		skillSet.title = replaceSetId(skillSet.title, linkIdentifier)
 	end
-	if not oneConfig then
-		if isExclusiveSet(configSetId, self.configListSpecialLinks) then
-			self.configTab:DeleteConfigSet(configSetId)
-		else
-			configSet.title = replaceSetId(configSet.title, linkIdentifier)
-		end
+	if not oneConfig and isExclusiveSet(configSetId, self.configListSpecialLinks) then
+		self.configTab:DeleteConfigSet(configSetId)
+	else
+		configSet.title = replaceSetId(configSet.title, linkIdentifier)
 	end
 
 
