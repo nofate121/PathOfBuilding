@@ -461,6 +461,29 @@ function TreeTabClass:CopySpec(specIdToCopy, newTitle)
 	return newSpec
 end
 
+function TreeTabClass:DeleteSpec(specId)
+
+	t_remove(self.specList, specId)
+	if specId == self.activeSpec then 
+		self:SetActiveSpec(m_max(1, specId - 1))
+	else
+		self.activeSpec = isValueInArray(self.specList, self.build.spec)
+	end
+	self.modFlag = true
+	self:UpdateItemsTabPassiveTreeDropdown()
+
+end
+
+function TreeTabClass:UpdateItemsTabPassiveTreeDropdown()
+	local secondarySpecList = self.build.itemsTab.controls.specSelect
+	local newSpecList = { }
+	for i = 1, #self.specList do
+		newSpecList[i] = self.specList[i].title or "Default"
+	end
+	secondarySpecList:SetList(newSpecList)
+	secondarySpecList.selIndex = self.activeSpec
+end
+
 function TreeTabClass:SetActiveSpec(specId)
 	local prevSpec = self.build.spec
 	self.activeSpec = m_min(specId, #self.specList)

@@ -2039,6 +2039,8 @@ function buildMode:NewLoadout(loadoutTitle)
 	local configSet = self.configTab:NewConfigSet(#self.configTab.configSets + 1)
 	t_insert(self.configTab.configSetOrderList, configSet.id)
 	configSet.title = loadoutTitle
+
+	return loadoutTitle
 end
 
 -- item, skill, and config sets have identical structure
@@ -2192,7 +2194,25 @@ end
 function buildMode:RenameLoadout()
 end
 
-function buildMode:DeleteLoadout()
+function buildMode:DeleteLoadout(loadout)
+	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
+	local oneItem = self.itemsTab and #self.itemsTab.itemSetOrderList == 1
+	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
+
+	local newSpecId = findNamedSetId(self.treeTab:GetSpecList(), loadout, self.treeListSpecialLinks)
+	local newItemId = oneItem and 1 or findSetId(self.itemsTab.itemSetOrderList, loadout, self.itemsTab.itemSets, self.itemListSpecialLinks)
+	local newSkillId = oneSkill and 1 or findSetId(self.skillsTab.skillSetOrderList, loadout, self.skillsTab.skillSets, self.skillListSpecialLinks)
+	local newConfigId = oneConfig and 1 or findSetId(self.configTab.configSetOrderList, loadout, self.configTab.configSets, self.configListSpecialLinks)
+
+	-- if exact match nor special grouping cannot find setIds, bail
+	if newSpecId == nil or newItemId == nil or newSkillId == nil or newConfigId == nil then
+		return false
+	end
+
+	self.treeTab:DeleteSpec(newSpecId)
+
+
+	return true
 end
 
 function buildMode:GetLoadoutList()

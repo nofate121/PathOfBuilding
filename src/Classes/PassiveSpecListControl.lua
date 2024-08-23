@@ -33,7 +33,7 @@ local PassiveSpecListClass = newClass("PassiveSpecListControl", "ListControl", f
 		local newSpec = treeTab:NewSpec()
 		self:RenameSpec(newSpec, "New Tree", true)
 	end)
-	self:UpdateItemsTabPassiveTreeDropdown()
+	self.treeTab.build:UpdateItemsTabPassiveTreeDropdown()
 end)
 
 function PassiveSpecListClass:RenameSpec(spec, title, addOnName)
@@ -50,7 +50,7 @@ function PassiveSpecListClass:RenameSpec(spec, title, addOnName)
 			self.selIndex = #self.list
 			self.selValue = spec
 		end
-		self:UpdateItemsTabPassiveTreeDropdown()
+		self.treeTab.build:UpdateItemsTabPassiveTreeDropdown()
 		self.treeTab.build:SyncLoadouts()
 		main:ClosePopup()
 	end)
@@ -75,7 +75,7 @@ end
 function PassiveSpecListClass:OnOrderChange()
 	self.treeTab.activeSpec = isValueInArray(self.list, self.treeTab.build.spec)
 	self.treeTab.modFlag = true
-	self:UpdateItemsTabPassiveTreeDropdown()
+	self.treeTab.build:UpdateItemsTabPassiveTreeDropdown()
 	self.treeTab.build:SyncLoadouts()
 end
 
@@ -88,17 +88,13 @@ end
 function PassiveSpecListClass:OnSelDelete(index, spec)
 	if #self.list > 1 then
 		main:OpenConfirmPopup("Delete Tree", "Are you sure you want to delete '"..(spec.title or "Default").."'?", "Delete", function()
-			t_remove(self.list, index)
+			
 			self.selIndex = nil
 			self.selValue = nil
-			if index == self.treeTab.activeSpec then 
-				self.treeTab:SetActiveSpec(m_max(1, index - 1))
-			else
-				self.treeTab.activeSpec = isValueInArray(self.list, self.treeTab.build.spec)
-			end
-			self.treeTab.modFlag = true
-			self:UpdateItemsTabPassiveTreeDropdown()
+			
+			self.treeTab:DeleteSpec(index)
 			self.treeTab.build:SyncLoadouts()
+			
 		end)
 	end
 end
@@ -107,15 +103,4 @@ function PassiveSpecListClass:OnSelKeyDown(index, spec, key)
 	if key == "F2" then
 		self:RenameSpec(spec, "Rename Tree")
 	end
-end
-
--- Update the passive tree dropdown control in itemsTab
-function PassiveSpecListClass:UpdateItemsTabPassiveTreeDropdown()
-	local secondarySpecList = self.treeTab.build.itemsTab.controls.specSelect
-	local newSpecList = { }
-	for i = 1, #self.list do
-		newSpecList[i] = self.list[i].title or "Default"
-	end
-	secondarySpecList:SetList(newSpecList)
-	secondarySpecList.selIndex = self.treeTab.activeSpec
 end
