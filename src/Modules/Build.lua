@@ -874,8 +874,8 @@ function buildMode:SyncLoadouts()
 	-- used when clicking on the dropdown to set the correct setId for each SetActiveSet()
 	self.treeListSpecialLinks, self.itemListSpecialLinks, self.skillListSpecialLinks, self.configListSpecialLinks = {}, {}, {}, {}
 
-	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
 	local oneItem = self.itemsTab and #self.itemsTab.itemSetOrderList == 1
+	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
 	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
 
 	if self.treeTab ~= nil and self.itemsTab ~= nil and self.skillsTab ~= nil and self.configTab ~= nil then
@@ -1512,11 +1512,11 @@ end
 
 function buildMode:OpenLoadoutManagePopup()
 	local controls = {}
-	controls.loadout = new("LoadoutListControl", nil, 0, 50, 350, 200, self)
+	controls.loadout = new("LoadoutListControl", nil, 0, 50, 450, 200, self)
 	controls.done = new("ButtonControl", {"TOP", controls.loadout, "BOTTOM"}, 0, 10, 90, 20, "Done", function()
 		main:ClosePopup()
 	end)
-	main:OpenPopup(370, 290, "Manage Loadout", controls)
+	main:OpenPopup(controls.loadout.width + 20, 290, "Manage Loadout", controls)
 end
 
 -- Refresh the set of controls used to select main group/skill/minion
@@ -2077,8 +2077,8 @@ end
 
 function buildMode:CopyLoadout(loadoutToCopy, newLoadoutName, setNewLoadoutAsActive)
 
-	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
 	local oneItem = self.itemsTab and #self.itemsTab.itemSetOrderList == 1
+	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
 	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
 
 	local copySpecId = findNamedSetId(self.treeTab:GetSpecList(), loadoutToCopy, self.treeListSpecialLinks)
@@ -2161,8 +2161,8 @@ function buildMode:CopyLoadout(loadoutToCopy, newLoadoutName, setNewLoadoutAsAct
 end
 
 function buildMode:SetActiveLoadout(value)
-	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
 	local oneItem = self.itemsTab and #self.itemsTab.itemSetOrderList == 1
+	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
 	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
 
 	local newSpecId = findNamedSetId(self.treeTab:GetSpecList(), value, self.treeListSpecialLinks)
@@ -2195,24 +2195,66 @@ function buildMode:RenameLoadout()
 end
 
 function buildMode:DeleteLoadout(loadout)
-	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
 	local oneItem = self.itemsTab and #self.itemsTab.itemSetOrderList == 1
+	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
 	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
 
-	local newSpecId = findNamedSetId(self.treeTab:GetSpecList(), loadout, self.treeListSpecialLinks)
-	local newItemId = oneItem and 1 or findSetId(self.itemsTab.itemSetOrderList, loadout, self.itemsTab.itemSets, self.itemListSpecialLinks)
-	local newSkillId = oneSkill and 1 or findSetId(self.skillsTab.skillSetOrderList, loadout, self.skillsTab.skillSets, self.skillListSpecialLinks)
-	local newConfigId = oneConfig and 1 or findSetId(self.configTab.configSetOrderList, loadout, self.configTab.configSets, self.configListSpecialLinks)
+	local specId = findNamedSetId(self.treeTab:GetSpecList(), loadout, self.treeListSpecialLinks)
+	local itemSetId = oneItem and 1 or findSetId(self.itemsTab.itemSetOrderList, loadout, self.itemsTab.itemSets, self.itemListSpecialLinks)
+	local skillSetId = oneSkill and 1 or findSetId(self.skillsTab.skillSetOrderList, loadout, self.skillsTab.skillSets, self.skillListSpecialLinks)
+	local configSetId = oneConfig and 1 or findSetId(self.configTab.configSetOrderList, loadout, self.configTab.configSets, self.configListSpecialLinks)
+
+	local spec = self.treeTab.specList[specId]
+	local itemSet = self.itemsTab.itemSets[itemSetId]
+	local skillSet = self.skillsTab.skillSets[skillSetId]
+	local configSet = self.configTab.configSets[configSetId]
 
 	-- if exact match nor special grouping cannot find setIds, bail
-	if newSpecId == nil or newItemId == nil or newSkillId == nil or newConfigId == nil then
+	if specId == nil or itemSetId == nil or skillSetId == nil or configSetId == nil then
 		return false
 	end
 
-	self.treeTab:DeleteSpec(newSpecId)
-	self.itemsTab:DeleteItemSet(newItemId)
-	self.skillsTab:DeleteSkillSet(newSkillId)
-	self.configTab:DeleteConfigSet(newConfigId)
+	local function isExclusiveSet(setId, setSpecialLinks)
+		local count = 0
+		for k, v in ipairs(setSpecialLinks) do
+			if setId == v["setId"] then
+				count = count + 1
+			end
+			if count > 1 then
+				return false
+			end
+		end
+		return true
+	end
+	
+	local linkIdentifier = string.match(loadout, "%{(%w+)%}")
+
+	self.treeTab:DeleteSpec(spec)
+
+	-- delete sets if not the only one, if set is not exclusive (it is shared) rename it instead
+	if not oneItem then
+		if isExclusiveSet(itemSetId, self.itemListSpecialLinks) then
+			-- delete
+			self.itemsTab:DeleteItemSet(itemSetId)
+		else 
+			-- rename
+			itemSet.title = itemSet.title:gsub("%{("..linkIdentifier..",?|,?"..linkIdentifier..")%}", "")
+		end
+	end
+	if not oneSkill then
+		if isExclusiveSet(skillSetId, self.skillListSpecialLinks) then
+			self.skillsTab:DeleteSkillSet(skillSetId)
+		else 
+			skillSet.title = skillSet.title:gsub("%{("..linkIdentifier..",?|,?"..linkIdentifier..")%}", "")
+		end
+	end
+	if not oneConfig then
+		if isExclusiveSet(configSetId, self.configListSpecialLinks) then
+			self.configTab:DeleteConfigSet(configSetId)
+		else
+			configSet.title = configSet.title:gsub("%{("..linkIdentifier..",?|,?"..linkIdentifier..")%}", "")
+		end
+	end
 
 
 	return true
