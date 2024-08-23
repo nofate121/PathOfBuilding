@@ -2216,7 +2216,7 @@ function buildMode:DeleteLoadout(loadout)
 
 	local function isExclusiveSet(setId, setSpecialLinks)
 		local count = 0
-		for k, v in ipairs(setSpecialLinks) do
+		for k, v in pairs(setSpecialLinks) do
 			if setId == v["setId"] then
 				count = count + 1
 			end
@@ -2226,10 +2226,17 @@ function buildMode:DeleteLoadout(loadout)
 		end
 		return true
 	end
+
+	-- this should be 	(string = "abc {4,5,6}", id = 5) -> "abc {4,6}"
+	-- 				    (string = "abc {5,6}", id = 5) -> "abc {6}"
+	-- 					(string = "abc {4,5}", id = 5) -> "abc {4}"
+	local function replaceSetId(string, id)
+		return string:gsub("%{"..id..",(.+)%}", "{%1}"):gsub("%{(.+),"..id.."%}", "{%1}"):gsub("%{(.+),"..id.."(,.+)%}", "{%1%2}")
+	end
 	
 	local linkIdentifier = string.match(loadout, "%{(%w+)%}")
 
-	self.treeTab:DeleteSpec(spec)
+	self.treeTab:DeleteSpec(specId)
 
 	-- delete sets if not the only one, if set is not exclusive (it is shared) rename it instead
 	if not oneItem then
@@ -2238,21 +2245,21 @@ function buildMode:DeleteLoadout(loadout)
 			self.itemsTab:DeleteItemSet(itemSetId)
 		else 
 			-- rename
-			itemSet.title = itemSet.title:gsub("%{("..linkIdentifier..",?|,?"..linkIdentifier..")%}", "")
+			itemSet.title = replaceSetId(itemSet.title, linkIdentifier)
 		end
 	end
 	if not oneSkill then
 		if isExclusiveSet(skillSetId, self.skillListSpecialLinks) then
 			self.skillsTab:DeleteSkillSet(skillSetId)
 		else 
-			skillSet.title = skillSet.title:gsub("%{("..linkIdentifier..",?|,?"..linkIdentifier..")%}", "")
+			skillSet.title = replaceSetId(skillSet.title, linkIdentifier)
 		end
 	end
 	if not oneConfig then
 		if isExclusiveSet(configSetId, self.configListSpecialLinks) then
 			self.configTab:DeleteConfigSet(configSetId)
 		else
-			configSet.title = configSet.title:gsub("%{("..linkIdentifier..",?|,?"..linkIdentifier..")%}", "")
+			configSet.title = replaceSetId(configSet.title, linkIdentifier)
 		end
 	end
 
