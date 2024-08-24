@@ -77,11 +77,35 @@ function LoadoutListControlClass:CopyPopup(loadout)
 	controls.edit = new("EditControl", nil, 0, 40, 350, 20, loadout, nil, nil, 100, function(buf)
 		controls.save.enabled = buf:match("%S")
 	end)
-	controls.label2 = new("LabelControl", {"LEFT", controls.edit,"RIGHT"}, 4, -20, 0, 16, "^7Loadout Id:")
-	controls.loadoutset = new("EditControl", {"LEFT", controls.edit,"RIGHT"}, 4, 0, 80, 20, loadout:match("(%{[%w,]+%})"), nil, nil, 100, function(buf)
-		controls.save.enabled = buf:match("%S")
-	end)
-	controls.save = new("ButtonControl", nil, -45, 70, 80, 20, "Save", function()
+	-- controls.label2 = new("LabelControl", {"LEFT", controls.edit,"RIGHT"}, 4, -20, 0, 16, "^7Loadout Id:")
+	-- controls.loadoutset = new("EditControl", {"LEFT", controls.edit,"RIGHT"}, 4, 0, 80, 20, loadout:match("(%{[%w,]+%})"), nil, nil, 100, function(buf)
+	-- 	controls.save.enabled = buf:match("%S")
+	-- end)
+
+	
+
+	controls.labelTree = new("LabelControl", nil, -100, 70, 0, 16, "Tree Set")
+	controls.checkNewTree = new("RadioButtonControl", {"TOPRIGHT",controls.labelTree,"BOTTOM"}, 100, 10, 20, "Create new Tree", function(state) 
+		
+	end, nil, true)
+	controls.checkCopyTree = new("RadioButtonControl", {"TOP",controls.checkNewTree,"BOTTOM"}, 0, 5, 20, "Copy Tree", function(state)
+
+	end, nil, false)
+	controls.checkShareTree = new("RadioButtonControl", {"TOP",controls.checkCopyTree,"BOTTOM"}, 0, 5, 20, "Share Tree", function(state)
+	
+	end, nil, false)
+	CreateRadioButtonGroup(controls.checkNewTree, controls.checkCopyTree, controls.checkShareTree)
+	controls.setListTree = new("DropDownControl", {"TOPRIGHT",controls.checkShareTree,"BOTTOMRIGHT"}, 0, 5, 190, 20, {}, nil)
+
+
+	controls.labelitem = new("LabelControl", nil, 100, 70, 0, 16, "Item Set")
+
+	controls.labelskill = new("LabelControl", nil, -100, 220, 0, 16, "Skill Set")
+
+	controls.labelconfig = new("LabelControl", nil, 100, 220, 0, 16, "Config Set")
+
+
+	controls.save = new("ButtonControl", nil, -45, 320, 80, 20, "Save", function()
 		local newName = controls.edit.buf
 		self.build.modFlag = true
 		if true then
@@ -97,11 +121,11 @@ function LoadoutListControlClass:CopyPopup(loadout)
 		main:ClosePopup()
 	end)
 	controls.save.enabled = false
-	controls.cancel = new("ButtonControl", nil, 45, 70, 80, 20, "Cancel", function()
+	controls.cancel = new("ButtonControl", nil, 45, 320, 80, 20, "Cancel", function()
 		main:ClosePopup()
 	end)
 	-- main:OpenPopup(370, 100, spec.title and "Rename" or "Set Name", controls, "save", "edit")
-	main:OpenPopup(470, 100, "Copy Loadout", controls, "save", "edit")
+	main:OpenPopup(470, 350, "Copy Loadout", controls, "save", "edit")
 
 	return loadout
 end
