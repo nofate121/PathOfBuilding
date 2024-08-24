@@ -7,12 +7,13 @@
 local SectionClass = newClass("SectionControl", "Control", function(self, anchor, x, y, width, height, label)
 	self.Control(anchor, x, y, width, height)
 	self.label = label
+	self.backgroundDrawlayer = -10
 end)
 
 function SectionClass:Draw()
 	local x, y = self:GetPos()
 	local width, height = self:GetSize()
-	SetDrawLayer(nil, -10)
+	SetDrawLayer(nil, self.backgroundDrawlayer)
 	SetDrawColor(0.66, 0.66, 0.66)
 	DrawImage(nil, x, y, width, height)
 	SetDrawColor(0.1, 0.1, 0.1)
