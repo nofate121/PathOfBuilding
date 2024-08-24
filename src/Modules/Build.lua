@@ -1512,7 +1512,7 @@ end
 
 function buildMode:OpenLoadoutManagePopup()
 	local controls = {}
-	controls.loadout = new("LoadoutListControl", nil, 0, 50, 450, 200, self)
+	controls.loadout = new("LoadoutListControl", nil, 0, 50, 460, 200, self)
 	controls.done = new("ButtonControl", {"TOP", controls.loadout, "BOTTOM"}, 0, 10, 90, 20, "Done", function()
 		main:ClosePopup()
 	end)
