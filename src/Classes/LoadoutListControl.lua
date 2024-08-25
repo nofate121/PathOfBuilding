@@ -97,6 +97,7 @@ function LoadoutListControlClass:CopyPopup(loadout)
 	CreateRadioButtonGroup(controls.checkNewTree, controls.checkCopyTree, controls.checkShareTree)
 	controls.setListTree = new("DropDownControl", {"TOPRIGHT",controls.checkShareTree,"BOTTOMRIGHT"}, 0, 5, 190, 20, {}, nil)
 	controls.setListTree.enabled = function() return not controls.checkNewTree.state end
+	controls.setListTree:SetList({"Level 01-20 Tree {1}", "Level 21-40 Leveling {2}", "Level 41-60 Leveling {3}"})
 	
 	controls[1] = new("SectionControl", {"TOP",controls.edit,"BOTTOM"}, 115, 20, 210, 115, "Item Set")
 	controls[1].backgroundDrawlayer = 0
