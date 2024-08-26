@@ -15,7 +15,7 @@ local LoadoutListControlClass = newClass("LoadoutListControl", "ListControl", fu
 	self.controls.copy = new("ButtonControl", {"BOTTOM",self,"TOP"}, 0, -4, 60, 18, "Copy", function()
 		-- local newLoadout = self.build:CopyLoadout(self.selValue)
 		-- self:RenameLoadout(newLoadout, "Copy Loadout", true)
-		self:CopyPopup(self.selValue)
+		self:LoadoutPopup(self.selValue, "copy")
 	end)
 	self.controls.copy.enabled = function()
 		return self.selValue ~= nil
@@ -33,11 +33,13 @@ local LoadoutListControlClass = newClass("LoadoutListControl", "ListControl", fu
 		return self.selValue ~= nil
 	end
 	self.controls.new = new("ButtonControl", {"RIGHT",self.controls.rename,"LEFT"}, -4, 0, 60, 18, "New", function()
-		local newLoadout = self:RenameLoadout("", "New Loadout", true)
-		self.build:SetActiveLoadout(newLoadout)
+		--local newLoadout = self:RenameLoadout("", "New Loadout", true)
+		--self.build:SetActiveLoadout(newLoadout)
+		self:LoadoutPopup(self.selValue, "new")
 	end)
 	self.controls.edit = new("ButtonControl", {"LEFT",self.controls.delete,"RIGHT"}, 4, 0, 60, 18, "Edit", function()
 		-- edit loadout popup
+		self:LoadoutPopup(self.selValue, "edit")
 	end)
 	
 end)
@@ -72,21 +74,31 @@ function LoadoutListControlClass:RenameLoadout(loadout, title, addOnName)
 	return loadout
 end
 
-function LoadoutListControlClass:CopyPopup(loadout)
+function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	local controls = { }
 	controls.label = new("LabelControl", nil, 0, 20, 0, 16, "^7Enter name for loadout:")
-	controls.edit = new("EditControl", nil, 0, 40, 350, 20, loadout, nil, nil, 100, function(buf)
+	-- automatically select next free set link number
+	local nextFreeId = 1
+	while self.list[nextFreeId] do
+		nextFreeId = nextFreeId + 1
+	end
+	local loadoutName = ""
+	if mode == "new" then
+		loadoutName = "New Loadout" .. " {" .. nextFreeId .. "}"
+	elseif mode == "edit" then
+		loadoutName = loadout["setName"] .. " {" .. loadout["linkId"] .. "}"
+	elseif mode == "copy" then
+		loadoutName = "Copy of " .. loadout["setName"] .. " {" .. nextFreeId .. "}"
+	end
+	controls.edit = new("EditControl", nil, 0, 40, 350, 20, loadoutName, nil, nil, 100, function(buf)
 		controls.save.enabled = buf:match("%S")
 	end)
-	-- controls.label2 = new("LabelControl", {"LEFT", controls.edit,"RIGHT"}, 4, -20, 0, 16, "^7Loadout Id:")
-	-- controls.loadoutset = new("EditControl", {"LEFT", controls.edit,"RIGHT"}, 4, 0, 80, 20, loadout:match("(%{[%w,]+%})"), nil, nil, 100, function(buf)
-	-- 	controls.save.enabled = buf:match("%S")
-	-- end)
 
+	controls.label2 = new("LabelControl", {"TOP",controls.edit,"BOTTOM"}, 0, 20, 0, 16, "^7Select sets for this loadout:")
 	
 	local backgroundColor = 0.15
 
-	controls.setListTree = new("DropDownControl", {"TOP",controls.edit,"BOTTOM"}, 0, 30, 190, 20, {}, nil)
+	controls.setListTree = new("DropDownControl", {"TOP",controls.label2,"BOTTOM"}, 0, 10, 190, 20, {}, nil)
 	local specNamesList = { }
 	for _, spec in ipairs(self.build.treeTab.specList) do
 		t_insert(specNamesList, (spec.title or "Default"))
@@ -96,43 +108,66 @@ function LoadoutListControlClass:CopyPopup(loadout)
 	controls.setListTree.maxDroppedWidth = 1000
 	controls.setListTree.enableDroppedWidth = true
 	controls.setListTree:SetList(specNamesList)
+	if mode == "new" then
+		controls.setListTree:SetSel(#controls.setListTree.list)
+	else
+		controls.setListTree:SetSel(loadout["treeSetId"])
+	end
 	controls.labelTree = new("LabelControl", {"LEFT", controls.setListTree,"RIGHT"}, 5, 0, 0, 16, "^7Tree Set")
 	
 
-	controls.setListItem = new("DropDownControl", {"TOP",controls.setListTree,"BOTTOM"}, 0, 20, 190, 20, nil, nil)
+	controls.setListItem = new("DropDownControl", {"TOP",controls.setListTree,"BOTTOM"}, 0, 15, 190, 20, nil, nil)
 	local itemNames = self.build.itemsTab:GetItemSetNamesList()
 	t_insert(itemNames, "^7^7-----")
 	t_insert(itemNames, "^7^7New Item Set")
 	controls.setListItem.maxDroppedWidth = 1000
 	controls.setListItem.enableDroppedWidth = true
 	controls.setListItem:SetList(itemNames)
+	if mode == "new" then
+		controls.setListItem:SetSel(#controls.setListItem.list)
+	else
+		local index = isValueInArray(self.build.itemsTab.itemSetOrderList, loadout["itemSetId"])
+		controls.setListItem:SetSel(index)
+	end
 	controls.checkShareItem = new("CheckBoxControl", {"RIGHT",controls.setListItem,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
 	controls.labelItem = new("LabelControl", {"LEFT", controls.setListItem,"RIGHT"}, 5, 0, 0, 16, "^7Item Set")
 	
 
-	controls.setListSkill = new("DropDownControl", {"TOP",controls.setListItem,"BOTTOM"}, 0, 20, 190, 20, nil, nil)
+	controls.setListSkill = new("DropDownControl", {"TOP",controls.setListItem,"BOTTOM"}, 0, 15, 190, 20, nil, nil)
 	local skillNames = self.build.skillsTab:GetSkillSetNamesList()
 	t_insert(skillNames, "^7^7-----")
 	t_insert(skillNames, "^7^7New Skill Set")
 	controls.setListSkill.maxDroppedWidth = 1000
 	controls.setListSkill.enableDroppedWidth = true
 	controls.setListSkill:SetList(skillNames)
+	if mode == "new" then
+		controls.setListSkill:SetSel(#controls.setListSkill.list)
+	else
+		local index = isValueInArray(self.build.skillsTab.skillSetOrderList, loadout["skillSetId"])
+		controls.setListSkill:SetSel(index)
+	end
 	controls.checkShareSkill = new("CheckBoxControl", {"RIGHT",controls.setListSkill,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
 	controls.labelSkill = new("LabelControl", {"LEFT", controls.setListSkill,"RIGHT"}, 5, 0, 0, 16, "^7Skill Set")
 	
 
-	controls.setListConfig = new("DropDownControl", {"TOP",controls.setListSkill,"BOTTOM"}, 0, 20, 190, 20, nil, nil)
+	controls.setListConfig = new("DropDownControl", {"TOP",controls.setListSkill,"BOTTOM"}, 0, 15, 190, 20, nil, nil)
 	local configNames = self.build.configTab:GetConfigNamesList()
 	t_insert(configNames, "^7^7-----")
 	t_insert(configNames, "^7^7New Config Set")
 	controls.setListConfig.maxDroppedWidth = 1000
 	controls.setListConfig.enableDroppedWidth = true
 	controls.setListConfig:SetList(configNames)
+	if mode == "new" then
+		controls.setListConfig:SetSel(#controls.setListConfig.list)
+	else
+		local index = isValueInArray(self.build.configTab.configSetOrderList, loadout["configSetId"])
+		controls.setListConfig:SetSel(index)
+	end
 	controls.checkShareConfig = new("CheckBoxControl", {"RIGHT",controls.setListConfig,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
 	controls.labelConfig = new("LabelControl", {"LEFT", controls.setListConfig,"RIGHT"}, 5, 0, 0, 16, "^7Config Set")
 	
 
-	controls.save = new("ButtonControl", {"TOP",controls.setListConfig,"BOTTOM"}, -45, 30, 80, 20, "Save", function()
+	controls.save = new("ButtonControl", {"TOP",controls.setListConfig,"BOTTOM"}, -45, 20, 80, 20, "Save", function()
 		local newName = controls.edit.buf
 		self.build.modFlag = true
 		if true then
@@ -148,11 +183,18 @@ function LoadoutListControlClass:CopyPopup(loadout)
 		main:ClosePopup()
 	end)
 	controls.save.enabled = false
-	controls.cancel = new("ButtonControl", {"TOP",controls.setListConfig,"BOTTOM"}, 45, 30, 80, 20, "Cancel", function()
+	controls.cancel = new("ButtonControl", {"TOP",controls.setListConfig,"BOTTOM"}, 45, 20, 80, 20, "Cancel", function()
 		main:ClosePopup()
 	end)
-	-- main:OpenPopup(370, 100, spec.title and "Rename" or "Set Name", controls, "save", "edit")
-	main:OpenPopup(480, 290, "Copy Loadout", controls, "save", "edit")
+	local title = ""
+	if mode == "new" then
+		title = "New Loadout"
+	elseif mode == "copy" then
+		title = "Copy Loadout"
+	elseif mode == "edit" then
+		title = "Edit Loadout"
+	end
+	main:OpenPopup(480, 290, title, controls, "save", "edit")
 
 	return loadout
 end

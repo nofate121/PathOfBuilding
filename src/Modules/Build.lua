@@ -2287,6 +2287,7 @@ function buildMode:GetLoadoutList()
 		if ((oneItem or self.itemListSpecialLinks[linkId]) and (oneSkill or self.skillListSpecialLinks[linkId]) and (oneConfig or self.configListSpecialLinks[linkId])) then
 			local loadout = {}
 			loadout["linkId"] = linkId
+			loadout["setName"] = self.itemListSpecialLinks[linkId]["setName"]
 
 			loadout["treeSetId"] = self.treeListSpecialLinks[linkId]["setId"]
 			loadout["itemSetId"] = oneItem and 1 or self.itemListSpecialLinks[linkId]["setId"]
