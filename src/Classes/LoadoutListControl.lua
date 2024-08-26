@@ -88,46 +88,34 @@ function LoadoutListControlClass:CopyPopup(loadout)
 	local backgroundColor = 0.15
 
 	-- name control '0' to draw it first, then other stuff on top
-	controls[0] = new("SectionControl", {"TOP",controls.edit,"BOTTOM"}, -115, 20, 210, 115, "Tree Set")
+	controls[0] = new("SectionControl", {"TOP",controls.edit,"BOTTOM"}, 0, 20, 300, 40, "Tree Set")
 	controls[0].backgroundDrawlayer = 0
 	controls[0].backgroundColor = backgroundColor
-	controls.checkNewTree = new("RadioButtonControl", {"TOPRIGHT",controls[0],"TOPRIGHT"}, -10, 10, 20, "Create new Tree", nil, nil, true)
-	controls.checkCopyTree = new("RadioButtonControl", {"TOP",controls.checkNewTree,"BOTTOM"}, 0, 5, 20, "Copy Tree", nil, nil, false)
-	controls.checkShareTree = new("RadioButtonControl", {"TOP",controls.checkCopyTree,"BOTTOM"}, 0, 5, 20, "Share Tree", nil, nil, false)
-	CreateRadioButtonGroup(controls.checkNewTree, controls.checkCopyTree, controls.checkShareTree)
-	controls.setListTree = new("DropDownControl", {"TOPRIGHT",controls.checkShareTree,"BOTTOMRIGHT"}, 0, 5, 190, 20, {}, nil)
-	controls.setListTree.enabled = function() return not controls.checkNewTree.state end
+	controls.setListTree = new("DropDownControl", {"RIGHT",controls[0],"RIGHT"}, -10, 0, 190, 20, {}, nil)
+	-- controls.setListTree.enabled = function() return not controls.checkNewTree.state end
 	controls.setListTree:SetList({"Level 01-20 Tree {1}", "Level 21-40 Leveling {2}", "Level 41-60 Leveling {3}"})
+	--controls.checkShareTree = new("CheckBoxControl", {"RIGHT",controls.setListTree,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
 	
-	controls[1] = new("SectionControl", {"TOP",controls.edit,"BOTTOM"}, 115, 20, 210, 115, "Item Set")
+	controls[1] = new("SectionControl", {"TOP",controls[0],"BOTTOM"}, 0, 20, 300, 40, "Item Set")
 	controls[1].backgroundDrawlayer = 0
 	controls[1].backgroundColor = backgroundColor
-	controls.checkNewItem = new("RadioButtonControl", {"TOPRIGHT",controls[1],"TOPRIGHT"}, -10, 10, 20, "Create new Item Set", nil, nil, true)
-	controls.checkCopyItem = new("RadioButtonControl", {"TOP",controls.checkNewItem,"BOTTOM"}, 0, 5, 20, "Copy Item Set", nil, nil, false)
-	controls.checkShareItem = new("RadioButtonControl", {"TOP",controls.checkCopyItem,"BOTTOM"}, 0, 5, 20, "Share Item Set", nil, nil, false)
-	CreateRadioButtonGroup(controls.checkNewItem, controls.checkCopyItem, controls.checkShareItem)
-	controls.setListItem = new("DropDownControl", {"TOPRIGHT",controls.checkShareItem,"BOTTOMRIGHT"}, 0, 5, 190, 20, {}, nil)
-	controls.setListItem.enabled = function() return not controls.checkNewItem.state end
-
-	controls[2] = new("SectionControl", {"TOP",controls[0],"BOTTOM"}, 0, 20, 210, 115, "Skill Set")
+	controls.setListItem = new("DropDownControl", {"RIGHT",controls[1],"RIGHT"}, -10, 0, 190, 20, self.build.itemsTab:GetItemSetNamesList(), nil)
+	-- controls.setListItem.enabled = function() return not controls.checkNewItem.state end
+	controls.checkShareItem = new("CheckBoxControl", {"RIGHT",controls.setListItem,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
+	
+	controls[2] = new("SectionControl", {"TOP",controls[1],"BOTTOM"}, 0, 20, 300, 40, "Skill Set")
 	controls[2].backgroundDrawlayer = 0
 	controls[2].backgroundColor = backgroundColor
-	controls.checkNewSkill = new("RadioButtonControl", {"TOPRIGHT",controls[2],"TOPRIGHT"}, -10, 10, 20, "Create new Skill Set", nil, nil, true)
-	controls.checkCopySkill = new("RadioButtonControl", {"TOP",controls.checkNewSkill,"BOTTOM"}, 0, 5, 20, "Copy Skill Set", nil, nil, false)
-	controls.checkShareSkill = new("RadioButtonControl", {"TOP",controls.checkCopySkill,"BOTTOM"}, 0, 5, 20, "Share Skill Set", nil, nil, false)
-	CreateRadioButtonGroup(controls.checkNewSkill, controls.checkCopySkill, controls.checkShareSkill)
-	controls.setListSkill = new("DropDownControl", {"TOPRIGHT",controls.checkShareSkill,"BOTTOMRIGHT"}, 0, 5, 190, 20, {}, nil)
-	controls.setListSkill.enabled = function() return not controls.checkNewSkill.state end
+	controls.setListSkill = new("DropDownControl", {"RIGHT",controls[2],"RIGHT"}, -10, 0, 190, 20, {}, nil)
+	-- controls.setListSkill.enabled = function() return not controls.checkNewSkill.state end
+	controls.checkShareSkill = new("CheckBoxControl", {"RIGHT",controls.setListSkill,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
 		
-	controls[3] = new("SectionControl", {"TOP",controls[1],"BOTTOM"}, 0, 20, 210, 115, "Config Set")
+	controls[3] = new("SectionControl", {"TOP",controls[2],"BOTTOM"}, 0, 20, 300, 40, "Config Set")
 	controls[3].backgroundDrawlayer = 0
 	controls[3].backgroundColor = backgroundColor
-	controls.checkNewConfig = new("RadioButtonControl", {"TOPRIGHT",controls[3],"TOPRIGHT"}, -10, 10, 20, "Create new Config Set", nil, nil, true)
-	controls.checkCopyConfig = new("RadioButtonControl", {"TOP",controls.checkNewConfig,"BOTTOM"}, 0, 5, 20, "Copy Config Set", nil, nil, false)
-	controls.checkShareConfig = new("RadioButtonControl", {"TOP",controls.checkCopyConfig,"BOTTOM"}, 0, 5, 20, "Share Config Set", nil, nil, false)
-	CreateRadioButtonGroup(controls.checkNewConfig, controls.checkCopyConfig, controls.checkShareConfig)
-	controls.setListConfig = new("DropDownControl", {"TOPRIGHT",controls.checkShareConfig,"BOTTOMRIGHT"}, 0, 5, 190, 20, {}, nil)
-	controls.setListConfig.enabled = function() return not controls.checkNewConfig.state end
+	controls.setListConfig = new("DropDownControl", {"RIGHT",controls[3],"RIGHT"}, -10, 0, 190, 20, self.build.configTab:GetConfigNamesList(), nil)
+	-- controls.setListConfig.enabled = function() return not controls.checkNewConfig.state end
+	controls.checkShareConfig = new("CheckBoxControl", {"RIGHT",controls.setListConfig,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
 	
 	-- controls.labelitem = new("LabelControl", nil, 100, 70, 0, 16, "Item Set")
 

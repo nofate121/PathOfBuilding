@@ -1290,6 +1290,15 @@ function ItemsTabClass:DeleteItemSet(itemSetId)
 	self:AddUndoState()
 end
 
+function ItemsTabClass:GetItemSetNamesList()
+	local list = { }
+	for _, itemSetId in ipairs(self.itemSetOrderList) do
+		local itemSet = self.itemSets[itemSetId]
+		t_insert(list, itemSet.title or "Default")
+	end
+	return list
+end
+
 -- Changes the active item set
 function ItemsTabClass:SetActiveItemSet(itemSetId)
 	local prevSet = self.activeItemSet

@@ -991,6 +991,16 @@ function ConfigTabClass:DeleteConfigSet(configSetId)
 	self:AddUndoState()
 end
 
+function ConfigTabClass:GetConfigNamesList()
+	local list = {}
+	for _, configSetId in ipairs(self.configSetOrderList) do
+		local configSet = self.configSets[configSetId]
+		t_insert(list, configSet.title or "Default")
+	end
+	return list
+end
+
+
 -- Changes the active config set
 function ConfigTabClass:SetActiveConfigSet(configSetId, init)
 	-- Initialize config sets if needed
