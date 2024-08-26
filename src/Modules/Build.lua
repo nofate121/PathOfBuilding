@@ -264,7 +264,7 @@ function buildMode:Init(dbFileName, buildName, buildXML, convertBuild, importLin
 			controls.checkCopy.x = (controls.checkCopy.width + 8 + controls.loadoutList.width) / -4
 			
 			
-			controls.loadoutList:SetList(self:GetLoadoutList())
+			controls.loadoutList:SetList(self:GetLoadoutNamesList())
 
 			controls.save = new("ButtonControl", {"TOP",controls.edit,"BOTTOM"}, -45, 40, 80, 20, "Save", function()
 				local loadout = controls.edit.buf
@@ -2261,7 +2261,9 @@ function buildMode:DeleteLoadout(loadout)
 	return true
 end
 
-function buildMode:GetLoadoutList()
+function buildMode:GetLoadoutNamesList()
+	self:SyncLoadouts()
+
 	local loadoutList = {}
 	local prefix = "^7^7"
 	for _, v in pairs(self.controls.buildLoadouts.list) do
@@ -2270,6 +2272,39 @@ function buildMode:GetLoadoutList()
 		end
 	end
 	return loadoutList
+end
+
+function buildMode:GetLoadoutList()
+	self:SyncLoadouts()
+	local list = {}
+
+	local oneItem = self.itemsTab and #self.itemsTab.itemSetOrderList == 1
+	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
+	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
+
+	for k, v in pairs(self.treeListSpecialLinks) do
+		local linkId = v.linkId
+		if ((oneItem or self.itemListSpecialLinks[linkId]) and (oneSkill or self.skillListSpecialLinks[linkId]) and (oneConfig or self.configListSpecialLinks[linkId])) then
+			local loadout = {}
+			loadout["linkId"] = linkId
+
+			loadout["treeSetId"] = self.treeListSpecialLinks[linkId]["setId"]
+			loadout["itemSetId"] = oneItem and 1 or self.itemListSpecialLinks[linkId]["setId"]
+			loadout["skillSetId"] = oneSkill and 1 or self.skillListSpecialLinks[linkId]["setId"]
+			loadout["configSetId"] = oneConfig and 1 or self.configListSpecialLinks[linkId]["setId"]
+
+			loadout["treeSet"] = self.treeTab.specList[loadout["treeSetId"]]
+			loadout["itemSet"] = self.itemsTab.itemSets[loadout["itemSetId"]]
+			loadout["skillSet"] = self.skillsTab.skillSets[loadout["skillSetId"]]
+			loadout["configSet"] = self.configTab.configSets[loadout["configSetId"]]
+
+			t_insert(list, loadout)
+		end
+	end
+	table.sort(list, function (a,b)
+		return a["treeSetId"] < b["treeSetId"]
+	end)
+	return list
 end
 
 return buildMode

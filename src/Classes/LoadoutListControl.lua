@@ -157,8 +157,10 @@ function LoadoutListControlClass:CopyPopup(loadout)
 	return loadout
 end
 
-function LoadoutListControlClass:GetRowValue(column, index, value)
-	return (value or "Default")
+function LoadoutListControlClass:GetRowValue(column, index, loadout)
+	local linkId = loadout["linkId"]
+	local tree = self.build.treeTab.specList[loadout["treeSetId"]]
+	return (self.build.treeListSpecialLinks[linkId]["setName"] .." {"..linkId.."}" or "Default")
 end
 
 function LoadoutListControlClass:OnSelClick(index, loadout, doubleClick)
