@@ -5,6 +5,7 @@
 --
 local t_insert = table.insert
 local t_remove = table.remove
+local ipairs = ipairs
 local m_max = math.max
 
 local LoadoutListControlClass = newClass("LoadoutListControl", "ListControl", function(self, anchor, x, y, width, height, build)
@@ -92,29 +93,42 @@ function LoadoutListControlClass:CopyPopup(loadout)
 	controls[0].backgroundDrawlayer = 0
 	controls[0].backgroundColor = backgroundColor
 	controls.setListTree = new("DropDownControl", {"RIGHT",controls[0],"RIGHT"}, -10, 0, 190, 20, {}, nil)
-	-- controls.setListTree.enabled = function() return not controls.checkNewTree.state end
-	controls.setListTree:SetList({"Level 01-20 Tree {1}", "Level 21-40 Leveling {2}", "Level 41-60 Leveling {3}"})
-	--controls.checkShareTree = new("CheckBoxControl", {"RIGHT",controls.setListTree,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
+	local specNamesList = { }
+	for _, spec in ipairs(self.build.treeTab.specList) do
+		t_insert(specNamesList, (spec.title or "Default"))
+	end
+	t_insert(specNamesList, "^7^7-----")
+	t_insert(specNamesList, "^7^7New Tree")
+	controls.setListTree:SetList(specNamesList)
 	
 	controls[1] = new("SectionControl", {"TOP",controls[0],"BOTTOM"}, 0, 20, 300, 40, "Item Set")
 	controls[1].backgroundDrawlayer = 0
 	controls[1].backgroundColor = backgroundColor
-	controls.setListItem = new("DropDownControl", {"RIGHT",controls[1],"RIGHT"}, -10, 0, 190, 20, self.build.itemsTab:GetItemSetNamesList(), nil)
-	-- controls.setListItem.enabled = function() return not controls.checkNewItem.state end
+	controls.setListItem = new("DropDownControl", {"RIGHT",controls[1],"RIGHT"}, -10, 0, 190, 20, nil, nil)
+	local itemNames = self.build.itemsTab:GetItemSetNamesList()
+	t_insert(itemNames, "^7^7-----")
+	t_insert(itemNames, "^7^7New Item Set")
+	controls.setListItem:SetList(itemNames)
 	controls.checkShareItem = new("CheckBoxControl", {"RIGHT",controls.setListItem,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
 	
 	controls[2] = new("SectionControl", {"TOP",controls[1],"BOTTOM"}, 0, 20, 300, 40, "Skill Set")
 	controls[2].backgroundDrawlayer = 0
 	controls[2].backgroundColor = backgroundColor
-	controls.setListSkill = new("DropDownControl", {"RIGHT",controls[2],"RIGHT"}, -10, 0, 190, 20, {}, nil)
-	-- controls.setListSkill.enabled = function() return not controls.checkNewSkill.state end
+	controls.setListSkill = new("DropDownControl", {"RIGHT",controls[2],"RIGHT"}, -10, 0, 190, 20, nil, nil)
+	local skillNames = self.build.skillsTab:GetSkillSetNamesList()
+	t_insert(skillNames, "^7^7-----")
+	t_insert(skillNames, "^7^7New Skill Set")
+	controls.setListSkill:SetList(skillNames)
 	controls.checkShareSkill = new("CheckBoxControl", {"RIGHT",controls.setListSkill,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
 		
 	controls[3] = new("SectionControl", {"TOP",controls[2],"BOTTOM"}, 0, 20, 300, 40, "Config Set")
 	controls[3].backgroundDrawlayer = 0
 	controls[3].backgroundColor = backgroundColor
-	controls.setListConfig = new("DropDownControl", {"RIGHT",controls[3],"RIGHT"}, -10, 0, 190, 20, self.build.configTab:GetConfigNamesList(), nil)
-	-- controls.setListConfig.enabled = function() return not controls.checkNewConfig.state end
+	controls.setListConfig = new("DropDownControl", {"RIGHT",controls[3],"RIGHT"}, -10, 0, 190, 20, nil, nil)
+	local configNames = self.build.configTab:GetConfigNamesList()
+	t_insert(configNames, "^7^7-----")
+	t_insert(configNames, "^7^7New Config Set")
+	controls.setListConfig:SetList(configNames)
 	controls.checkShareConfig = new("CheckBoxControl", {"RIGHT",controls.setListConfig,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
 	
 	-- controls.labelitem = new("LabelControl", nil, 100, 70, 0, 16, "Item Set")

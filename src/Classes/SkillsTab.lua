@@ -1358,6 +1358,15 @@ function SkillsTabClass:DeleteSkillSet(skillSetId)
 	self:AddUndoState()
 end
 
+function SkillsTabClass:GetSkillSetNamesList()
+	local list = { }
+	for _, skillSetId in ipairs(self.skillSetOrderList) do
+		local skillSet = self.skillSets[skillSetId]
+		t_insert(list, skillSet.title or "Default")
+	end
+	return list
+end
+
 -- Changes the active skill set
 function SkillsTabClass:SetActiveSkillSet(skillSetId)
 	-- Initialize skill sets if needed
