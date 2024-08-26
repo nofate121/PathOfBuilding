@@ -84,61 +84,55 @@ function LoadoutListControlClass:CopyPopup(loadout)
 	-- end)
 
 	
-
-	--controls.labelTree = new("LabelControl", nil, -100, 70, 0, 16, "Tree Set")
 	local backgroundColor = 0.15
 
-	-- name control '0' to draw it first, then other stuff on top
-	controls[0] = new("SectionControl", {"TOP",controls.edit,"BOTTOM"}, 0, 20, 300, 40, "Tree Set")
-	controls[0].backgroundDrawlayer = 0
-	controls[0].backgroundColor = backgroundColor
-	controls.setListTree = new("DropDownControl", {"RIGHT",controls[0],"RIGHT"}, -10, 0, 190, 20, {}, nil)
+	controls.setListTree = new("DropDownControl", {"TOP",controls.edit,"BOTTOM"}, 0, 30, 190, 20, {}, nil)
 	local specNamesList = { }
 	for _, spec in ipairs(self.build.treeTab.specList) do
 		t_insert(specNamesList, (spec.title or "Default"))
 	end
 	t_insert(specNamesList, "^7^7-----")
 	t_insert(specNamesList, "^7^7New Tree")
+	controls.setListTree.maxDroppedWidth = 1000
+	controls.setListTree.enableDroppedWidth = true
 	controls.setListTree:SetList(specNamesList)
+	controls.labelTree = new("LabelControl", {"LEFT", controls.setListTree,"RIGHT"}, 5, 0, 0, 16, "^7Tree Set")
 	
-	controls[1] = new("SectionControl", {"TOP",controls[0],"BOTTOM"}, 0, 20, 300, 40, "Item Set")
-	controls[1].backgroundDrawlayer = 0
-	controls[1].backgroundColor = backgroundColor
-	controls.setListItem = new("DropDownControl", {"RIGHT",controls[1],"RIGHT"}, -10, 0, 190, 20, nil, nil)
+
+	controls.setListItem = new("DropDownControl", {"TOP",controls.setListTree,"BOTTOM"}, 0, 20, 190, 20, nil, nil)
 	local itemNames = self.build.itemsTab:GetItemSetNamesList()
 	t_insert(itemNames, "^7^7-----")
 	t_insert(itemNames, "^7^7New Item Set")
+	controls.setListItem.maxDroppedWidth = 1000
+	controls.setListItem.enableDroppedWidth = true
 	controls.setListItem:SetList(itemNames)
 	controls.checkShareItem = new("CheckBoxControl", {"RIGHT",controls.setListItem,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
+	controls.labelItem = new("LabelControl", {"LEFT", controls.setListItem,"RIGHT"}, 5, 0, 0, 16, "^7Item Set")
 	
-	controls[2] = new("SectionControl", {"TOP",controls[1],"BOTTOM"}, 0, 20, 300, 40, "Skill Set")
-	controls[2].backgroundDrawlayer = 0
-	controls[2].backgroundColor = backgroundColor
-	controls.setListSkill = new("DropDownControl", {"RIGHT",controls[2],"RIGHT"}, -10, 0, 190, 20, nil, nil)
+
+	controls.setListSkill = new("DropDownControl", {"TOP",controls.setListItem,"BOTTOM"}, 0, 20, 190, 20, nil, nil)
 	local skillNames = self.build.skillsTab:GetSkillSetNamesList()
 	t_insert(skillNames, "^7^7-----")
 	t_insert(skillNames, "^7^7New Skill Set")
+	controls.setListSkill.maxDroppedWidth = 1000
+	controls.setListSkill.enableDroppedWidth = true
 	controls.setListSkill:SetList(skillNames)
 	controls.checkShareSkill = new("CheckBoxControl", {"RIGHT",controls.setListSkill,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
-		
-	controls[3] = new("SectionControl", {"TOP",controls[2],"BOTTOM"}, 0, 20, 300, 40, "Config Set")
-	controls[3].backgroundDrawlayer = 0
-	controls[3].backgroundColor = backgroundColor
-	controls.setListConfig = new("DropDownControl", {"RIGHT",controls[3],"RIGHT"}, -10, 0, 190, 20, nil, nil)
+	controls.labelSkill = new("LabelControl", {"LEFT", controls.setListSkill,"RIGHT"}, 5, 0, 0, 16, "^7Skill Set")
+	
+
+	controls.setListConfig = new("DropDownControl", {"TOP",controls.setListSkill,"BOTTOM"}, 0, 20, 190, 20, nil, nil)
 	local configNames = self.build.configTab:GetConfigNamesList()
 	t_insert(configNames, "^7^7-----")
 	t_insert(configNames, "^7^7New Config Set")
+	controls.setListConfig.maxDroppedWidth = 1000
+	controls.setListConfig.enableDroppedWidth = true
 	controls.setListConfig:SetList(configNames)
 	controls.checkShareConfig = new("CheckBoxControl", {"RIGHT",controls.setListConfig,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
+	controls.labelConfig = new("LabelControl", {"LEFT", controls.setListConfig,"RIGHT"}, 5, 0, 0, 16, "^7Config Set")
 	
-	-- controls.labelitem = new("LabelControl", nil, 100, 70, 0, 16, "Item Set")
 
-	-- controls.labelskill = new("LabelControl", nil, -100, 220, 0, 16, "Skill Set")
-
-	-- controls.labelconfig = new("LabelControl", nil, 100, 220, 0, 16, "Config Set")
-
-
-	controls.save = new("ButtonControl", nil, -45, 345, 80, 20, "Save", function()
+	controls.save = new("ButtonControl", {"TOP",controls.setListConfig,"BOTTOM"}, -45, 30, 80, 20, "Save", function()
 		local newName = controls.edit.buf
 		self.build.modFlag = true
 		if true then
@@ -154,11 +148,11 @@ function LoadoutListControlClass:CopyPopup(loadout)
 		main:ClosePopup()
 	end)
 	controls.save.enabled = false
-	controls.cancel = new("ButtonControl", nil, 45, 345, 80, 20, "Cancel", function()
+	controls.cancel = new("ButtonControl", {"TOP",controls.setListConfig,"BOTTOM"}, 45, 30, 80, 20, "Cancel", function()
 		main:ClosePopup()
 	end)
 	-- main:OpenPopup(370, 100, spec.title and "Rename" or "Set Name", controls, "save", "edit")
-	main:OpenPopup(480, 375, "Copy Loadout", controls, "save", "edit")
+	main:OpenPopup(480, 290, "Copy Loadout", controls, "save", "edit")
 
 	return loadout
 end
