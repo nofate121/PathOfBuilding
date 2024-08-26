@@ -33,7 +33,7 @@ local PassiveSpecListClass = newClass("PassiveSpecListControl", "ListControl", f
 		local newSpec = treeTab:NewSpec()
 		self:RenameSpec(newSpec, "New Tree", true)
 	end)
-	self.treeTab.build:UpdateItemsTabPassiveTreeDropdown()
+	self.treeTab:UpdateItemsTabPassiveTreeDropdown()
 end)
 
 function PassiveSpecListClass:RenameSpec(spec, title, addOnName)
@@ -50,7 +50,7 @@ function PassiveSpecListClass:RenameSpec(spec, title, addOnName)
 			self.selIndex = #self.list
 			self.selValue = spec
 		end
-		self.treeTab.build:UpdateItemsTabPassiveTreeDropdown()
+		self.treeTab:UpdateItemsTabPassiveTreeDropdown()
 		self.treeTab.build:SyncLoadouts()
 		main:ClosePopup()
 	end)
@@ -75,7 +75,7 @@ end
 function PassiveSpecListClass:OnOrderChange()
 	self.treeTab.activeSpec = isValueInArray(self.list, self.treeTab.build.spec)
 	self.treeTab.modFlag = true
-	self.treeTab.build:UpdateItemsTabPassiveTreeDropdown()
+	self.treeTab:UpdateItemsTabPassiveTreeDropdown()
 	self.treeTab.build:SyncLoadouts()
 end
 
