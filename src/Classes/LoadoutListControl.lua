@@ -98,7 +98,12 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	
 	local backgroundColor = 0.15
 
-	controls.setListTree = new("DropDownControl", {"TOP",controls.label2,"BOTTOM"}, 0, 10, 190, 20, {}, nil)
+	controls.setListTree = new("DropDownControl", {"TOP",controls.label2,"BOTTOM"}, 0, 10, 190, 20, nil, function(index,value)
+		if value == "^7^7-----" then
+			controls.setListTree:SetSel(1)
+			return
+		end
+	end)
 	local specNamesList = { }
 	for _, spec in ipairs(self.build.treeTab.specList) do
 		t_insert(specNamesList, (spec.title or "Default"))
@@ -116,7 +121,12 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	controls.labelTree = new("LabelControl", {"LEFT", controls.setListTree,"RIGHT"}, 5, 0, 0, 16, "^7Tree Set")
 	
 
-	controls.setListItem = new("DropDownControl", {"TOP",controls.setListTree,"BOTTOM"}, 0, 15, 190, 20, nil, nil)
+	controls.setListItem = new("DropDownControl", {"TOP",controls.setListTree,"BOTTOM"}, 0, 15, 190, 20, nil, function(index,value)
+		if value == "^7^7-----" then
+			controls.setListItem:SetSel(1)
+			return
+		end
+	end)
 	local itemNames = self.build.itemsTab:GetItemSetNamesList()
 	t_insert(itemNames, "^7^7-----")
 	t_insert(itemNames, "^7^7New Item Set")
@@ -133,7 +143,12 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	controls.labelItem = new("LabelControl", {"LEFT", controls.setListItem,"RIGHT"}, 5, 0, 0, 16, "^7Item Set")
 	
 
-	controls.setListSkill = new("DropDownControl", {"TOP",controls.setListItem,"BOTTOM"}, 0, 15, 190, 20, nil, nil)
+	controls.setListSkill = new("DropDownControl", {"TOP",controls.setListItem,"BOTTOM"}, 0, 15, 190, 20, nil, function(index,value)
+		if value == "^7^7-----" then
+			controls.setListSkill:SetSel(1)
+			return
+		end
+	end)
 	local skillNames = self.build.skillsTab:GetSkillSetNamesList()
 	t_insert(skillNames, "^7^7-----")
 	t_insert(skillNames, "^7^7New Skill Set")
@@ -150,7 +165,12 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	controls.labelSkill = new("LabelControl", {"LEFT", controls.setListSkill,"RIGHT"}, 5, 0, 0, 16, "^7Skill Set")
 	
 
-	controls.setListConfig = new("DropDownControl", {"TOP",controls.setListSkill,"BOTTOM"}, 0, 15, 190, 20, nil, nil)
+	controls.setListConfig = new("DropDownControl", {"TOP",controls.setListSkill,"BOTTOM"}, 0, 15, 190, 20, nil, function(index,value)
+		if value == "^7^7-----" then
+			controls.setListConfig:SetSel(1)
+			return
+		end
+	end)
 	local configNames = self.build.configTab:GetConfigNamesList()
 	t_insert(configNames, "^7^7-----")
 	t_insert(configNames, "^7^7New Config Set")
