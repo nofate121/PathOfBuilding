@@ -2194,7 +2194,8 @@ end
 function buildMode:RenameLoadout()
 end
 
-function buildMode:EditLoadout(linkId, newName, newTreeSetId, newItemSetId, newSkillSetId, newConfigSetId)
+-- if a setId is nil this will create a new set
+function buildMode:EditLoadout(linkId, newName, newTreeSetId, newItemSetId, newSkillSetId, newConfigSetId, shareItemSet, shareSkillSet, shareConfigSet)
 	local loadout = self:GetLoadoutInfo(linkId)
 	local newLinkId = string.match(newName, "%{(%w+)%}")
 

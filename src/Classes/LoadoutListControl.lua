@@ -41,6 +41,9 @@ local LoadoutListControlClass = newClass("LoadoutListControl", "ListControl", fu
 		-- edit loadout popup
 		self:LoadoutPopup(self.selValue, "edit")
 	end)
+	self.controls.edit.enabled = function()
+		return self.selValue ~= nil
+	end
 	
 end)
 
@@ -116,9 +119,9 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	controls.setListTree:SetList(specNamesList)
 	local initialTreeIndex = loadout.treeSetId
 	if mode == "new" then
-		controls.setListTree:SetSel(#controls.setListTree.list)
+		controls.setListTree:SetSel(#controls.setListTree.list, true)
 	else
-		controls.setListTree:SetSel(initialTreeIndex)
+		controls.setListTree:SetSel(initialTreeIndex, true)
 	end
 	controls.labelTree = new("LabelControl", {"LEFT", controls.setListTree,"RIGHT"}, 5, 0, 0, 16, "^7Tree Set")
 	
@@ -128,6 +131,11 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 		if value == "^7^7-----" then
 			controls.setListItem:SetSel(1)
 			return
+		elseif value == "^7^7New Item Set" then
+			controls.checkShareItem.enabled = false
+			controls.checkShareItem.state = false
+		else
+			controls.checkShareItem.enabled = true
 		end
 	end)
 	local itemNames = self.build.itemsTab:GetItemSetNamesList()
@@ -138,9 +146,9 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	controls.setListItem:SetList(itemNames)
 	local initialItemIndex = isValueInArray(self.build.itemsTab.itemSetOrderList, loadout.itemSetId)
 	if mode == "new" then
-		controls.setListItem:SetSel(#controls.setListItem.list)
+		controls.setListItem:SetSel(#controls.setListItem.list, true)
 	else
-		controls.setListItem:SetSel(initialItemIndex)
+		controls.setListItem:SetSel(initialItemIndex, true)
 	end
 	controls.checkShareItem = new("CheckBoxControl", {"RIGHT",controls.setListItem,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
 	controls.labelItem = new("LabelControl", {"LEFT", controls.setListItem,"RIGHT"}, 5, 0, 0, 16, "^7Item Set")
@@ -151,6 +159,11 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 		if value == "^7^7-----" then
 			controls.setListSkill:SetSel(1)
 			return
+		elseif value == "^7^7New Skill Set" then
+			controls.checkShareSkill.enabled = false
+			controls.checkShareSkill.state = false
+		else
+			controls.checkShareSkill.enabled = true
 		end
 	end)
 	local skillNames = self.build.skillsTab:GetSkillSetNamesList()
@@ -161,9 +174,9 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	controls.setListSkill:SetList(skillNames)
 	local initialSkillIndex = isValueInArray(self.build.skillsTab.skillSetOrderList, loadout.skillSetId)
 	if mode == "new" then
-		controls.setListSkill:SetSel(#controls.setListSkill.list)
+		controls.setListSkill:SetSel(#controls.setListSkill.list, true)
 	else
-		controls.setListSkill:SetSel(initialSkillIndex)
+		controls.setListSkill:SetSel(initialSkillIndex, true)
 	end
 	controls.checkShareSkill = new("CheckBoxControl", {"RIGHT",controls.setListSkill,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
 	controls.labelSkill = new("LabelControl", {"LEFT", controls.setListSkill,"RIGHT"}, 5, 0, 0, 16, "^7Skill Set")
@@ -174,7 +187,14 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 		if value == "^7^7-----" then
 			controls.setListConfig:SetSel(1)
 			return
+		elseif value == "^7^7New Config Set" then
+			controls.checkShareConfig.enabled = false
+			controls.checkShareConfig.state = false
+		else
+			controls.checkShareConfig.enabled = true
 		end
+		
+		controls.checkShareConfig.enabled = false
 	end)
 	local configNames = self.build.configTab:GetConfigNamesList()
 	t_insert(configNames, "^7^7-----")
@@ -184,13 +204,22 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	controls.setListConfig:SetList(configNames)
 	local initialConfigIndex = isValueInArray(self.build.configTab.configSetOrderList, loadout.configSetId)
 	if mode == "new" then
-		controls.setListConfig:SetSel(#controls.setListConfig.list)
+		controls.setListConfig:SetSel(#controls.setListConfig.list, true)
 	else
-		controls.setListConfig:SetSel(initialConfigIndex)
+		controls.setListConfig:SetSel(initialConfigIndex, true)
 	end
 	controls.checkShareConfig = new("CheckBoxControl", {"RIGHT",controls.setListConfig,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
 	controls.labelConfig = new("LabelControl", {"LEFT", controls.setListConfig,"RIGHT"}, 5, 0, 0, 16, "^7Config Set")
 	
+	if mode == "edit" then
+		controls.checkShareItem.state = true
+		controls.checkShareSkill.state = true
+		controls.checkShareConfig.state = true
+	elseif mode == "new" then
+		controls.checkShareItem.enabled = false
+		controls.checkShareSkill.enabled = false
+		controls.checkShareConfig.enabled = false
+	end
 
 	controls.save = new("ButtonControl", {"TOP",controls.setListConfig,"BOTTOM"}, -45, 20, 80, 20, "Save", function()
 		local newName = controls.edit.buf
@@ -205,7 +234,8 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 			self.build:EditLoadout(loadout.linkId, newName, controls.setListTree.selIndex, 
 				self.build.itemsTab.itemSetOrderList[controls.setListItem.selIndex],
 				self.build.skillsTab.skillSetOrderList[controls.setListSkill.selIndex],
-				self.build.configTab.configSetOrderList[controls.setListConfig.selIndex]
+				self.build.configTab.configSetOrderList[controls.setListConfig.selIndex],
+				controls.checkShareItem.state, controls.checkShareSkill.state, controls.checkShareConfig.state
 			)
 		end
 
