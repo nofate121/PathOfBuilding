@@ -86,9 +86,9 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	if mode == "new" then
 		loadoutName = "New Loadout" .. " {" .. nextFreeId .. "}"
 	elseif mode == "edit" then
-		loadoutName = loadout["setName"] .. " {" .. loadout["linkId"] .. "}"
+		loadoutName = loadout.setName .. " {" .. loadout.linkId .. "}"
 	elseif mode == "copy" then
-		loadoutName = "Copy of " .. loadout["setName"] .. " {" .. nextFreeId .. "}"
+		loadoutName = "Copy of " .. loadout.setName .. " {" .. nextFreeId .. "}"
 	end
 	controls.edit = new("EditControl", nil, 0, 40, 350, 20, loadoutName, nil, nil, 100, function(buf)
 		controls.save.enabled = buf:match("%S")
@@ -99,6 +99,7 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	local backgroundColor = 0.15
 
 	controls.setListTree = new("DropDownControl", {"TOP",controls.label2,"BOTTOM"}, 0, 10, 190, 20, nil, function(index,value)
+		controls.save.enabled = true
 		if value == "^7^7-----" then
 			controls.setListTree:SetSel(1)
 			return
@@ -113,15 +114,17 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	controls.setListTree.maxDroppedWidth = 1000
 	controls.setListTree.enableDroppedWidth = true
 	controls.setListTree:SetList(specNamesList)
+	local initialTreeIndex = loadout.treeSetId
 	if mode == "new" then
 		controls.setListTree:SetSel(#controls.setListTree.list)
 	else
-		controls.setListTree:SetSel(loadout["treeSetId"])
+		controls.setListTree:SetSel(initialTreeIndex)
 	end
 	controls.labelTree = new("LabelControl", {"LEFT", controls.setListTree,"RIGHT"}, 5, 0, 0, 16, "^7Tree Set")
 	
 
 	controls.setListItem = new("DropDownControl", {"TOP",controls.setListTree,"BOTTOM"}, 0, 15, 190, 20, nil, function(index,value)
+		controls.save.enabled = true
 		if value == "^7^7-----" then
 			controls.setListItem:SetSel(1)
 			return
@@ -133,17 +136,18 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	controls.setListItem.maxDroppedWidth = 1000
 	controls.setListItem.enableDroppedWidth = true
 	controls.setListItem:SetList(itemNames)
+	local initialItemIndex = isValueInArray(self.build.itemsTab.itemSetOrderList, loadout.itemSetId)
 	if mode == "new" then
 		controls.setListItem:SetSel(#controls.setListItem.list)
 	else
-		local index = isValueInArray(self.build.itemsTab.itemSetOrderList, loadout["itemSetId"])
-		controls.setListItem:SetSel(index)
+		controls.setListItem:SetSel(initialItemIndex)
 	end
 	controls.checkShareItem = new("CheckBoxControl", {"RIGHT",controls.setListItem,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
 	controls.labelItem = new("LabelControl", {"LEFT", controls.setListItem,"RIGHT"}, 5, 0, 0, 16, "^7Item Set")
 	
 
 	controls.setListSkill = new("DropDownControl", {"TOP",controls.setListItem,"BOTTOM"}, 0, 15, 190, 20, nil, function(index,value)
+		controls.save.enabled = true
 		if value == "^7^7-----" then
 			controls.setListSkill:SetSel(1)
 			return
@@ -155,17 +159,18 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	controls.setListSkill.maxDroppedWidth = 1000
 	controls.setListSkill.enableDroppedWidth = true
 	controls.setListSkill:SetList(skillNames)
+	local initialSkillIndex = isValueInArray(self.build.skillsTab.skillSetOrderList, loadout.skillSetId)
 	if mode == "new" then
 		controls.setListSkill:SetSel(#controls.setListSkill.list)
 	else
-		local index = isValueInArray(self.build.skillsTab.skillSetOrderList, loadout["skillSetId"])
-		controls.setListSkill:SetSel(index)
+		controls.setListSkill:SetSel(initialSkillIndex)
 	end
 	controls.checkShareSkill = new("CheckBoxControl", {"RIGHT",controls.setListSkill,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
 	controls.labelSkill = new("LabelControl", {"LEFT", controls.setListSkill,"RIGHT"}, 5, 0, 0, 16, "^7Skill Set")
 	
 
 	controls.setListConfig = new("DropDownControl", {"TOP",controls.setListSkill,"BOTTOM"}, 0, 15, 190, 20, nil, function(index,value)
+		controls.save.enabled = true
 		if value == "^7^7-----" then
 			controls.setListConfig:SetSel(1)
 			return
@@ -177,11 +182,11 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	controls.setListConfig.maxDroppedWidth = 1000
 	controls.setListConfig.enableDroppedWidth = true
 	controls.setListConfig:SetList(configNames)
+	local initialConfigIndex = isValueInArray(self.build.configTab.configSetOrderList, loadout.configSetId)
 	if mode == "new" then
 		controls.setListConfig:SetSel(#controls.setListConfig.list)
 	else
-		local index = isValueInArray(self.build.configTab.configSetOrderList, loadout["configSetId"])
-		controls.setListConfig:SetSel(index)
+		controls.setListConfig:SetSel(initialConfigIndex)
 	end
 	controls.checkShareConfig = new("CheckBoxControl", {"RIGHT",controls.setListConfig,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
 	controls.labelConfig = new("LabelControl", {"LEFT", controls.setListConfig,"RIGHT"}, 5, 0, 0, 16, "^7Config Set")
@@ -189,20 +194,29 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 
 	controls.save = new("ButtonControl", {"TOP",controls.setListConfig,"BOTTOM"}, -45, 20, 80, 20, "Save", function()
 		local newName = controls.edit.buf
-		self.build.modFlag = true
-		if true then
-			t_insert(self.list, newName)
-			self.selIndex = #self.list
-			self.selValue = newName
 
-			loadout = self.build:CopyLoadout(newName)
-		else
-			self.build:RenameLoadout(loadout, newName)
+		if mode == "new" then
+			
+
+		elseif mode == "copy" then
+			
+
+		elseif mode == "edit" then
+			self.build:EditLoadout(loadout.linkId, newName, controls.setListTree.selIndex, 
+				self.build.itemsTab.itemSetOrderList[controls.setListItem.selIndex],
+				self.build.skillsTab.skillSetOrderList[controls.setListSkill.selIndex],
+				self.build.configTab.configSetOrderList[controls.setListConfig.selIndex]
+			)
 		end
+
+
 		self.build:SyncLoadouts()
+		self.list = self.build:GetLoadoutList()
+
 		main:ClosePopup()
 	end)
 	controls.save.enabled = false
+
 	controls.cancel = new("ButtonControl", {"TOP",controls.setListConfig,"BOTTOM"}, 45, 20, 80, 20, "Cancel", function()
 		main:ClosePopup()
 	end)
@@ -220,8 +234,8 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 end
 
 function LoadoutListControlClass:GetRowValue(column, index, loadout)
-	local linkId = loadout["linkId"]
-	local tree = self.build.treeTab.specList[loadout["treeSetId"]]
+	local linkId = loadout.linkId
+	local tree = self.build.treeTab.specList[loadout.treeSetId]
 	return (self.build.treeListSpecialLinks[linkId]["setName"] .." {"..linkId.."}" or "Default")
 end
 

@@ -2194,6 +2194,40 @@ end
 function buildMode:RenameLoadout()
 end
 
+function buildMode:EditLoadout(linkId, newName, newTreeSetId, newItemSetId, newSkillSetId, newConfigSetId)
+	local loadout = self:GetLoadoutInfo(linkId)
+	local newLinkId = string.match(newName, "%{(%w+)%}")
+
+	local oneItem = self.itemsTab and #self.itemsTab.itemSetOrderList == 1
+	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
+	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
+	
+	if linkId ~= newLinkId or newTreeSetId ~= loadout.treeSetId then
+		loadout.treeSet.title = RemoveLinkIdFromName(loadout.treeSet.title, linkId)
+		local newTreeSet = self.treeTab.specList[newTreeSetId]
+		newTreeSet.title = AddLinkIdToName(newTreeSet.title, newLinkId)
+	end
+
+	if not oneItem and (linkId ~= newLinkId or newItemSetId ~= loadout.itemSetId) then
+		loadout.itemSet.title = RemoveLinkIdFromName(loadout.itemSet.title, linkId)
+		local newItemSet = self.itemsTab.itemSets[newItemSetId]
+		newItemSet.title = AddLinkIdToName(newItemSet.title, newLinkId)
+	end
+
+	if not oneSkill and (linkId ~= newLinkId or newSkillSetId ~= loadout.skillSetId) then
+		loadout.skillSet.title = RemoveLinkIdFromName(loadout.skillSet.title, linkId)
+		local newSkillSet = self.skillsTab.skillSets[newSkillSetId]
+		newSkillSet.title = AddLinkIdToName(newSkillSet.title, newLinkId)
+	end
+
+	if not oneConfig and (linkId ~= newLinkId or newConfigSetId ~= loadout.configSet) then
+		loadout.configSet.title = RemoveLinkIdFromName(loadout.configSet.title, linkId)
+		local newConfigSet = self.configTab.configSets[newConfigSetId]
+		newConfigSet.title = AddLinkIdToName(newConfigSet.title, newLinkId)
+	end
+
+end
+
 function buildMode:DeleteLoadout(loadout)
 	local oneItem = self.itemsTab and #self.itemsTab.itemSetOrderList == 1
 	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
@@ -2285,27 +2319,64 @@ function buildMode:GetLoadoutList()
 	for k, v in pairs(self.treeListSpecialLinks) do
 		local linkId = v.linkId
 		if ((oneItem or self.itemListSpecialLinks[linkId]) and (oneSkill or self.skillListSpecialLinks[linkId]) and (oneConfig or self.configListSpecialLinks[linkId])) then
-			local loadout = {}
-			loadout["linkId"] = linkId
-			loadout["setName"] = self.itemListSpecialLinks[linkId]["setName"]
-
-			loadout["treeSetId"] = self.treeListSpecialLinks[linkId]["setId"]
-			loadout["itemSetId"] = oneItem and 1 or self.itemListSpecialLinks[linkId]["setId"]
-			loadout["skillSetId"] = oneSkill and 1 or self.skillListSpecialLinks[linkId]["setId"]
-			loadout["configSetId"] = oneConfig and 1 or self.configListSpecialLinks[linkId]["setId"]
-
-			loadout["treeSet"] = self.treeTab.specList[loadout["treeSetId"]]
-			loadout["itemSet"] = self.itemsTab.itemSets[loadout["itemSetId"]]
-			loadout["skillSet"] = self.skillsTab.skillSets[loadout["skillSetId"]]
-			loadout["configSet"] = self.configTab.configSets[loadout["configSetId"]]
-
-			t_insert(list, loadout)
+			t_insert(list, self:GetLoadoutInfo(linkId))
 		end
 	end
 	table.sort(list, function (a,b)
 		return a["treeSetId"] < b["treeSetId"]
 	end)
 	return list
+end
+
+function buildMode:GetLoadoutInfo(linkId)
+	local oneItem = self.itemsTab and #self.itemsTab.itemSetOrderList == 1
+	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
+	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
+
+	local loadout = {}
+	loadout.linkId = linkId
+	loadout.setName = self.treeListSpecialLinks[linkId].setName
+
+	loadout.treeSetId = self.treeListSpecialLinks[linkId].setId
+	loadout.itemSetId = oneItem and 1 or self.itemListSpecialLinks[linkId].setId
+	loadout.skillSetId = oneSkill and 1 or self.skillListSpecialLinks[linkId].setId
+	loadout.configSetId = oneConfig and 1 or self.configListSpecialLinks[linkId].setId
+
+	loadout.treeSet = self.treeTab.specList[loadout.treeSetId]
+	loadout.itemSet = self.itemsTab.itemSets[loadout.itemSetId]
+	loadout.skillSet = self.skillsTab.skillSets[loadout.skillSetId]
+	loadout.configSet = self.configTab.configSets[loadout.configSetId]
+
+	return loadout
+end
+
+function RemoveLinkIdFromName(name, linkId)
+	return name:gsub("%{"..linkId..",(.+)%}", "{%1}"):gsub("%{(.+),"..linkId.."%}", "{%1}"):gsub("%{(.+),"..linkId.."(,.+)%}", "{%1%2}"):gsub("%{"..linkId.."%}", "")
+end
+
+function AddLinkIdToName(name, linkId)
+	local linkIdentifier = string.match(name, "%{([%w,]+)%}")
+	if not linkIdentifier then
+		return name .. "{"..linkId.."}"
+	end
+	local linkIdList = {}
+	for id in string.gmatch(linkIdentifier, "[^%,]+") do
+		t_insert(linkIdList, id)
+	end
+	t_insert(linkIdList, linkId)
+	table.sort(linkIdList)
+	local newLinkIdString = ""
+	local firstloop = true
+	for _, id in ipairs(linkIdList) do
+		if firstloop then
+			newLinkIdString = newLinkIdString .. id 
+			firstloop = false
+		else
+			newLinkIdString = newLinkIdString .. "," .. id
+		end
+	end
+	local newstring = name:gsub("%{[%w,]+%}", "{"..newLinkIdString.."}")
+	return newstring
 end
 
 return buildMode
