@@ -2207,10 +2207,28 @@ function buildMode:EditLoadout(linkId, newName, newTreeSetId, newItemSetId, newS
 		newItemSet.title = AddLinkIdToName(newItemSet.title, newLinkId)
 	end
 
-	if not oneSkill and (linkId ~= newLinkId or newSkillSetId ~= loadout.skillSetId) then
-		loadout.skillSet.title = RemoveLinkIdFromName(loadout.skillSet.title, linkId)
-		local newSkillSet = self.skillsTab.skillSets[newSkillSetId]
-		newSkillSet.title = AddLinkIdToName(newSkillSet.title, newLinkId)
+	if newSkillSetId then
+		-- setId is not nil -> existing set will be used
+
+		if shareSkillSet then
+			-- set will be shared between loadouts
+
+			if not oneSkill and (linkId ~= newLinkId or newSkillSetId ~= loadout.skillSetId) then
+				-- either linkId changed or setId changed (and there isn't only one set) -> rename
+
+				loadout.skillSet.title = RemoveLinkIdFromName(loadout.skillSet.title, linkId)
+				local newSkillSet = self.skillsTab.skillSets[newSkillSetId]
+				newSkillSet.title = AddLinkIdToName(newSkillSet.title, newLinkId)
+			end
+		else
+			-- instead of sharing a new copy of the set will be created
+
+			loadout.skillSet.title = RemoveLinkIdFromName(loadout.skillSet.title, linkId)
+		
+		end
+	else
+		-- setId is nil -> new set will be created and used
+
 	end
 
 	if not oneConfig and (linkId ~= newLinkId or newConfigSetId ~= loadout.configSet) then
