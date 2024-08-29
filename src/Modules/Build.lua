@@ -2224,11 +2224,21 @@ function buildMode:EditLoadout(linkId, newName, newTreeSetId, newItemSetId, newS
 			-- instead of sharing a new copy of the set will be created
 
 			loadout.skillSet.title = RemoveLinkIdFromName(loadout.skillSet.title, linkId)
-		
+			local newSkill = self.skillsTab:CopySkillSet(newSkillSetId, newName)
 		end
 	else
 		-- setId is nil -> new set will be created and used
 
+		loadout.skillSet.title = RemoveLinkIdFromName(loadout.skillSet.title, linkId)
+		local newSkill = self.skillsTab:NewSkillSet(newSkillSetId)
+		newSkill.title = newName
+	end
+	
+	if oneSkill and (not newSkillSetId or not shareSkillSet) then
+		-- all other loadouts used this one loadout as default, and we are creating a new set
+		-- so in order to not break those loadouts we have to: 
+		-- 1. if some don't have a linkId, give them one
+		-- 2. add the linkId of all loadouts which used it implicitly to the old set
 	end
 
 	if not oneConfig and (linkId ~= newLinkId or newConfigSetId ~= loadout.configSet) then
