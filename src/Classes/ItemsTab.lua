@@ -920,7 +920,7 @@ holding Shift will put it in the second.]])
 
 	-- Initialise item sets
 	self.itemSets = { }
-	self.itemSetOrderList = { 1 }
+	self.itemSetOrderList = { }
 	self:NewItemSet(1)
 	self:SetActiveItemSet(1)
 
@@ -1009,7 +1009,6 @@ function ItemsTabClass:Load(xml, dbFileName)
 					itemSet[id] = { pbURL = child.attrib.itemPbURL or "" }
 				end
 			end
-			t_insert(self.itemSetOrderList, itemSet.id)
 		elseif node.elem == "TradeSearchWeights" then
 			for _, child in ipairs(node) do
 				local statSort = {
@@ -1024,7 +1023,6 @@ function ItemsTabClass:Load(xml, dbFileName)
 	if not self.itemSetOrderList[1] then
 		self.activeItemSet = self:NewItemSet(1)
 		self.activeItemSet.useSecondWeaponSet = xml.attrib.useSecondWeaponSet == "true"
-		self.itemSetOrderList[1] = 1
 	end
 	self:SetActiveItemSet(tonumber(xml.attrib.activeItemSet) or 1)
 	if xml.attrib.showStatDifferences then
@@ -1262,6 +1260,7 @@ function ItemsTabClass:NewItemSet(itemSetId)
 		end
 	end
 	self.itemSets[itemSet.id] = itemSet
+	t_insert(self.itemSetOrderList, itemSet.id)
 	return itemSet
 end
 
@@ -1277,6 +1276,7 @@ function ItemsTabClass:CopyItemSet(itemSetIdToCopy, newTitle)
 		newItemSet.title = newTitle
 	end
 	self.itemSets[newItemSet.id] = newItemSet
+	t_insert(self.itemSetOrderList, newItemSet.id)
 	return newItemSet
 end
 
@@ -1287,7 +1287,6 @@ function ItemsTabClass:DeleteItemSet(itemSetId)
 	if itemSetId == self.activeItemSetId then
 		self:SetActiveItemSet(self.itemSetOrderList[m_max(1, index - 1)])
 	end
-	self:AddUndoState()
 end
 
 function ItemsTabClass:GetItemSetNamesList()

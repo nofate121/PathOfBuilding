@@ -45,9 +45,7 @@ function SkillSetListClass:RenameSet(skillSet, addOnName)
 		skillSet.title = controls.edit.buf
 		self.skillsTab.modFlag = true
 		if addOnName then
-			t_insert(self.list, skillSet.id)
-			self.selIndex = #self.list
-			self.selValue = skillSet
+			self:SelectIndex(#self.list)
 		end
 		self.skillsTab:AddUndoState()
 		self.skillsTab.build:SyncLoadouts()
@@ -56,7 +54,7 @@ function SkillSetListClass:RenameSet(skillSet, addOnName)
 	controls.save.enabled = false
 	controls.cancel = new("ButtonControl", nil, 45, 70, 80, 20, "Cancel", function()
 		if addOnName then
-			self.skillsTab.skillSets[skillSet.id] = nil
+			self.skillsTab:DeleteSkillSet(skillSet.id)
 		end
 		main:ClosePopup()
 	end)
@@ -87,7 +85,8 @@ function SkillSetListClass:OnSelDelete(index, skillSetId)
 		main:OpenConfirmPopup("Delete Item Set", "Are you sure you want to delete '"..(skillSet.title or "Default").."'?", "Delete", function()
 			self.selIndex = nil
 			self.selValue = nil
-			self.skillsTab:DeleteSkillSet(skillSetId)			
+			self.skillsTab:DeleteSkillSet(skillSetId)
+			self.skillsTab:AddUndoState()
 			self.skillsTab.build:SyncLoadouts()
 		end)
 	end

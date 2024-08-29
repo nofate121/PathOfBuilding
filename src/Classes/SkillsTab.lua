@@ -252,7 +252,7 @@ will automatically apply to the skill.]]
 
 	-- Initialise skill sets
 	self.skillSets = { }
-	self.skillSetOrderList = { 1 }
+	self.skillSetOrderList = { }
 	self:NewSkillSet(1)
 	self:SetActiveSkillSet(1)
 
@@ -404,7 +404,6 @@ function SkillsTabClass:Load(xml, fileName)
 		if node.elem == "Skill" then
 			-- Old format, initialize skill sets if needed
 			if not self.skillSetOrderList[1] then
-				self.skillSetOrderList[1] = 1
 				self:NewSkillSet(1)
 			end
 			self:LoadSkill(node, 1)
@@ -413,7 +412,6 @@ function SkillsTabClass:Load(xml, fileName)
 		if node.elem == "SkillSet" then
 			local skillSet = self:NewSkillSet(tonumber(node.attrib.id))
 			skillSet.title = node.attrib.title
-			t_insert(self.skillSetOrderList, skillSet.id)
 			for _, subNode in ipairs(node) do
 				self:LoadSkill(subNode, skillSet.id)
 			end
@@ -1321,6 +1319,7 @@ function SkillsTabClass:NewSkillSet(skillSetId)
 		end
 	end
 	self.skillSets[skillSet.id] = skillSet
+	t_insert(self.skillSetOrderList, skillSet.id)
 	return skillSet
 end
 
@@ -1345,6 +1344,7 @@ function SkillsTabClass:CopySkillSet(skillSetIdToCopy, newTitle)
 		newSkillSet.title = newTitle
 	end
 	self.skillSets[newSkillSet.id] = newSkillSet
+	t_insert(self.skillSetOrderList, newSkillSet.id)
 	return newSkillSet
 end
 
@@ -1355,7 +1355,6 @@ function SkillsTabClass:DeleteSkillSet(skillSetId)
 	if skillSetId == self.activeSkillSetId then
 		self:SetActiveSkillSet(self.skillSetOrderList[m_max(1, index - 1)])
 	end
-	self:AddUndoState()
 end
 
 function SkillsTabClass:GetSkillSetNamesList()
@@ -1371,7 +1370,6 @@ end
 function SkillsTabClass:SetActiveSkillSet(skillSetId)
 	-- Initialize skill sets if needed
 	if not self.skillSetOrderList[1] then
-		self.skillSetOrderList[1] = 1
 		self:NewSkillSet(1)
 	end
 

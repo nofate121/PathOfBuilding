@@ -443,6 +443,7 @@ function TreeTabClass:NewSpec()
 	newSpec:SelectClass(self.build.spec.curClassId)
 	newSpec:SelectAscendClass(self.build.spec.curAscendClassId)
 	newSpec:SelectSecondaryAscendClass(self.build.spec.curSecondaryAscendClassId)
+	t_insert(self.specList, newSpec)
 	return newSpec
 end
 
@@ -458,11 +459,11 @@ function TreeTabClass:CopySpec(specIdToCopy, newTitle)
 	newSpec.jewels = copyTable(copySpec.jewels)
 	newSpec:RestoreUndoState(copySpec:CreateUndoState())
 	newSpec:BuildClusterJewelGraphs()
+	t_insert(self.specList, newSpec)
 	return newSpec
 end
 
 function TreeTabClass:DeleteSpec(specId)
-
 	t_remove(self.specList, specId)
 	if specId == self.activeSpec then 
 		self:SetActiveSpec(m_max(1, specId - 1))
@@ -471,7 +472,6 @@ function TreeTabClass:DeleteSpec(specId)
 	end
 	self.modFlag = true
 	self:UpdateItemsTabPassiveTreeDropdown()
-
 end
 
 function TreeTabClass:UpdateItemsTabPassiveTreeDropdown()

@@ -46,9 +46,7 @@ function ItemSetListClass:RenameSet(itemSet, addOnName)
 		itemSet.title = controls.edit.buf
 		self.itemsTab.modFlag = true
 		if addOnName then
-			t_insert(self.list, itemSet.id)
-			self.selIndex = #self.list
-			self.selValue = itemSet
+			self:SelectIndex(#self.list)
 		end
 		self.itemsTab:AddUndoState()
 		self.itemsTab.build:SyncLoadouts()
@@ -57,7 +55,7 @@ function ItemSetListClass:RenameSet(itemSet, addOnName)
 	controls.save.enabled = false
 	controls.cancel = new("ButtonControl", nil, 45, 70, 80, 20, "Cancel", function()
 		if addOnName then
-			self.itemsTab.itemSets[itemSet.id] = nil
+			self.itemsTab.DeleteItemSet(itemSet.id, true)
 		end
 		main:ClosePopup()
 	end)
@@ -95,7 +93,11 @@ function ItemSetListClass:ReceiveDrag(type, value, source)
 			self.itemsTab:AddItem(newItem, true)
 			itemSet[slotName].selItemId = newItem.id
 		end
-		t_insert(self.list, self.selDragIndex or #self.list + 1, itemSet.id)
+		if self.selDragIndex then
+			-- place set in the correct drag position
+			t_remove(self.list, #self.list)
+			t_insert(self.list, self.selDragIndex, itemSet.id)
+		end
 		self.itemsTab:AddUndoState()
 	end
 end
@@ -118,6 +120,7 @@ function ItemSetListClass:OnSelDelete(index, itemSetId)
 			self.selIndex = nil
 			self.selValue = nil
 			self.itemsTab:DeleteItemSet(itemSetId)
+			self.itemsTab:AddUndoState()
 			self.itemsTab.build:SyncLoadouts()
 		end)
 	end

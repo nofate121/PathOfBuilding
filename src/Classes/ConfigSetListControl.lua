@@ -44,9 +44,7 @@ function ConfigSetListClass:RenameSet(configSet, addOnName)
 		configSet.title = controls.edit.buf
 		self.configTab.modFlag = true
 		if addOnName then
-			t_insert(self.list, configSet.id)
-			self.selIndex = #self.list
-			self.selValue = configSet
+			self:SelectIndex(#self.list)
 		end
 		self.configTab:AddUndoState()
 		self.configTab.build:SyncLoadouts()
@@ -55,7 +53,7 @@ function ConfigSetListClass:RenameSet(configSet, addOnName)
 	controls.save.enabled = false
 	controls.cancel = new("ButtonControl", nil, 45, 70, 80, 20, "Cancel", function()
 		if addOnName then
-			self.configTab.configSets[configSet.id] = nil
+			self.configTab:DeleteConfigSet(configSet.id)
 		end
 		main:ClosePopup()
 	end)
@@ -87,6 +85,7 @@ function ConfigSetListClass:OnSelDelete(index, configSetId)
 			self.selIndex = nil
 			self.selValue = nil
 			self.configTab:DeleteConfigSet(configSetId)
+			self.configTab:AddUndoState()
 			self.configTab.build:SyncLoadouts()
 		end)
 	end

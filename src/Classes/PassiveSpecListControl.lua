@@ -46,9 +46,7 @@ function PassiveSpecListClass:RenameSpec(spec, title, addOnName)
 		spec.title = controls.edit.buf
 		self.treeTab.modFlag = true
 		if addOnName then
-			t_insert(self.list, spec)
-			self.selIndex = #self.list
-			self.selValue = spec
+			self:SelectIndex(#self.list)
 		end
 		self.treeTab:UpdateItemsTabPassiveTreeDropdown()
 		self.treeTab.build:SyncLoadouts()
@@ -56,6 +54,9 @@ function PassiveSpecListClass:RenameSpec(spec, title, addOnName)
 	end)
 	controls.save.enabled = false
 	controls.cancel = new("ButtonControl", nil, 45, 70, 80, 20, "Cancel", function()
+		if addOnName then
+			self.treeTab:DeleteSpec(#self.list)
+		end
 		main:ClosePopup()
 	end)
 	-- main:OpenPopup(370, 100, spec.title and "Rename" or "Set Name", controls, "save", "edit")

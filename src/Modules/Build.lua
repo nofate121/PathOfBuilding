@@ -2026,18 +2026,14 @@ end
 function buildMode:NewLoadout(loadoutTitle)
 	local newSpec = new("PassiveSpec", self, latestTreeVersion)
 	newSpec.title = loadoutTitle
-	t_insert(self.treeTab.specList, newSpec)
 
 	local itemSet = self.itemsTab:NewItemSet(#self.itemsTab.itemSets + 1)
-	t_insert(self.itemsTab.itemSetOrderList, itemSet.id)
 	itemSet.title = loadoutTitle
 
 	local skillSet = self.skillsTab:NewSkillSet(#self.skillsTab.skillSets + 1)
-	t_insert(self.skillsTab.skillSetOrderList, skillSet.id)
 	skillSet.title = loadoutTitle
 
 	local configSet = self.configTab:NewConfigSet(#self.configTab.configSets + 1)
-	t_insert(self.configTab.configSetOrderList, configSet.id)
 	configSet.title = loadoutTitle
 
 	return loadoutTitle
@@ -2103,14 +2099,12 @@ function buildMode:CopyLoadout(loadoutToCopy, newLoadoutName, setNewLoadoutAsAct
 	
 	-- copy tree
 	local newSpec = self.treeTab:CopySpec(copySpecId, newLoadoutName)
-	t_insert(self.treeTab.specList, newSpec)
 
 	newSpecId = #self.treeTab.specList
 
 	-- copy item
 	if not oneItem then
 		local newItemSet = self.itemsTab:CopyItemSet(copyItemId, newLoadoutName)
-		t_insert(self.itemsTab.itemSetOrderList, newItemSet.id)
 
 		newItemId = newItemSet.id
 	else
@@ -2120,7 +2114,6 @@ function buildMode:CopyLoadout(loadoutToCopy, newLoadoutName, setNewLoadoutAsAct
 	--copy skill
 	if not oneSkill then
 		local newSkill = self.skillsTab:CopySkillSet(copySkillId, newLoadoutName)
-		t_insert(self.skillsTab.skillSetOrderList, newSkill.id)
 		
 		newSkillId = newSkill.id
 	else
@@ -2130,7 +2123,6 @@ function buildMode:CopyLoadout(loadoutToCopy, newLoadoutName, setNewLoadoutAsAct
 	-- copy config
 	if not oneConfig then
 		local newConfig = self.configTab:CopyConfigSet(copyConfigId, newLoadoutName)
-		t_insert(self.configTab.configSetOrderList, newConfig.id)
 
 		newConfigId = newConfig.id
 	else

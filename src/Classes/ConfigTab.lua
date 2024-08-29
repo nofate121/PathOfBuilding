@@ -25,7 +25,7 @@ local ConfigTabClass = newClass("ConfigTab", "UndoHandler", "ControlHost", "Cont
 
 	-- Initialise config sets
 	self.configSets = { }
-	self.configSetOrderList = { 1 }
+	self.configSetOrderList = { }
 	self:NewConfigSet(1)
 	self:SetActiveConfigSet(1, true)
 	
@@ -615,7 +615,7 @@ end)
 function ConfigTabClass:Load(xml, fileName)
 	self.activeConfigSetId = 1
 	self.configSets = { }
-	self.configSetOrderList = { 1 }
+	self.configSetOrderList = { }
 
 	local function setInputAndPlaceholder(node, configSetId)
 		if node.elem == "Input" then
@@ -670,7 +670,6 @@ function ConfigTabClass:Load(xml, fileName)
 		else
 			local configSetId = tonumber(node.attrib.id)
 			self:NewConfigSet(configSetId, node.attrib.title or "Default")
-			self.configSetOrderList[index] = configSetId
 			for _, child in ipairs(node) do
 				setInputAndPlaceholder(child, configSetId)
 			end
@@ -963,6 +962,7 @@ function ConfigTabClass:NewConfigSet(configSetId, title)
 		end
 	end
 	self.configSets[configSet.id] = configSet
+	t_insert(self.configSetOrderList, configSet.id)
 	return configSet
 end
 
@@ -978,6 +978,7 @@ function ConfigTabClass:CopyConfigSet(configSetIdToCopy, newTitle)
 		newConfigSet.title = newTitle
 	end
 	self.configSets[newConfigSet.id] = newConfigSet
+	t_insert(self.configSetOrderList, newConfigSet.id)
 	return newConfigSet
 end
 
@@ -988,7 +989,6 @@ function ConfigTabClass:DeleteConfigSet(configSetId)
 	if configSetId == self.activeConfigSetId then
 		self:SetActiveConfigSet(self.configSetOrderList[m_max(1, index - 1)])
 	end
-	self:AddUndoState()
 end
 
 function ConfigTabClass:GetConfigNamesList()
@@ -1005,7 +1005,6 @@ end
 function ConfigTabClass:SetActiveConfigSet(configSetId, init)
 	-- Initialize config sets if needed
 	if not self.configSetOrderList[1] then
-		self.configSetOrderList[1] = 1
 		self:NewConfigSet(1)
 	end
 

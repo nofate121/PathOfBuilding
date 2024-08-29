@@ -231,6 +231,8 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 			
 
 		elseif mode == "edit" then
+			-- if New Tree Set is selected (or New Item Set etc.) it won't be found in the setorderlist, 
+			-- thus nil will be passed to the function call requesting to create one
 			self.build:EditLoadout(loadout.linkId, newName, controls.setListTree.selIndex, 
 				self.build.itemsTab.itemSetOrderList[controls.setListItem.selIndex],
 				self.build.skillsTab.skillSetOrderList[controls.setListSkill.selIndex],
