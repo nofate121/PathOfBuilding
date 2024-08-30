@@ -2024,7 +2024,7 @@ function buildMode:SaveDBFile()
 end
 
 function buildMode:NewLoadout(loadoutTitle)
-	local newSpec = new("PassiveSpec", self, latestTreeVersion)
+	local newSpec = self.treeTab:NewSpec()
 	newSpec.title = loadoutTitle
 
 	local itemSet = self.itemsTab:NewItemSet(#self.itemsTab.itemSets + 1)
@@ -2375,13 +2375,24 @@ function buildMode:GetLoadoutNamesList()
 end
 
 function buildMode:GetLoadoutList()
-	self:SyncLoadouts()
+	local treeList, itemList, skillList, configList = self:SyncLoadouts()
+
 	local list = {}
 
 	local oneItem = self.itemsTab and #self.itemsTab.itemSetOrderList == 1
 	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
 	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
 
+	-- todo
+	-- -- loop over all for exact match loadouts
+	-- for id, tree in ipairs(treeList) do
+	-- 	if (oneItem or itemList[tree]) and (oneSkill or skillList[tree]) and (oneConfig or configList[tree]) then
+	-- 		t_insert(filteredList, tree)
+	-- 		t_insert(list, self:GetLoadoutInfo(linkId))
+	-- 	end
+	-- end
+
+	-- loop over the identifiers found within braces and set the loadout name to the TreeSet
 	for k, v in pairs(self.treeListSpecialLinks) do
 		local linkId = v.linkId
 		if ((oneItem or self.itemListSpecialLinks[linkId]) and (oneSkill or self.skillListSpecialLinks[linkId]) and (oneConfig or self.configListSpecialLinks[linkId])) then
@@ -2417,7 +2428,8 @@ function buildMode:GetLoadoutInfo(linkId)
 end
 
 function RemoveLinkIdFromName(name, linkId)
-	return name:gsub("%{"..linkId..",(.+)%}", "{%1}"):gsub("%{(.+),"..linkId.."%}", "{%1}"):gsub("%{(.+),"..linkId.."(,.+)%}", "{%1%2}"):gsub("%{"..linkId.."%}", "")
+	return name:gsub("%{"..linkId..",(.+)%}", "{%1}"):gsub("%{(.+),"..linkId.."%}", "{%1}")
+		:gsub("%{(.+),"..linkId.."(,.+)%}", "{%1%2}"):gsub("%{"..linkId.."%}", "")
 end
 
 function AddLinkIdToName(name, linkId)
