@@ -123,6 +123,12 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	else
 		controls.setListTree:SetSel(initialTreeIndex, true)
 	end
+	controls.setListTree.tooltipFunc = function(tooltip, mode, index, value)
+		tooltip:Clear()
+		if not controls.setListTree.dropped then
+			tooltip:AddLine(16, "^7"..controls.setListTree:GetSelValue())
+		end
+	end
 	controls.labelTree = new("LabelControl", {"LEFT", controls.setListTree,"RIGHT"}, 5, 0, 0, 16, "^7Tree Set")
 	
 
@@ -149,6 +155,12 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 		controls.setListItem:SetSel(#controls.setListItem.list, true)
 	else
 		controls.setListItem:SetSel(initialItemIndex, true)
+	end
+	controls.setListItem.tooltipFunc = function(tooltip, mode, index, value)
+		tooltip:Clear()
+		if not controls.setListItem.dropped then
+			tooltip:AddLine(16, "^7"..controls.setListItem:GetSelValue())
+		end
 	end
 	controls.checkShareItem = new("CheckBoxControl", {"RIGHT",controls.setListItem,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
 	controls.labelItem = new("LabelControl", {"LEFT", controls.setListItem,"RIGHT"}, 5, 0, 0, 16, "^7Item Set")
@@ -177,6 +189,12 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 		controls.setListSkill:SetSel(#controls.setListSkill.list, true)
 	else
 		controls.setListSkill:SetSel(initialSkillIndex, true)
+	end
+	controls.setListSkill.tooltipFunc = function(tooltip, mode, index, value)
+		tooltip:Clear()
+		if not controls.setListSkill.dropped then
+			tooltip:AddLine(16, "^7"..controls.setListSkill:GetSelValue())
+		end
 	end
 	controls.checkShareSkill = new("CheckBoxControl", {"RIGHT",controls.setListSkill,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
 	controls.labelSkill = new("LabelControl", {"LEFT", controls.setListSkill,"RIGHT"}, 5, 0, 0, 16, "^7Skill Set")
@@ -207,6 +225,12 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 		controls.setListConfig:SetSel(#controls.setListConfig.list, true)
 	else
 		controls.setListConfig:SetSel(initialConfigIndex, true)
+	end
+	controls.setListConfig.tooltipFunc = function(tooltip, mode, index, value)
+		tooltip:Clear()
+		if not controls.setListConfig.dropped then
+			tooltip:AddLine(16, "^7"..controls.setListConfig:GetSelValue())
+		end
 	end
 	controls.checkShareConfig = new("CheckBoxControl", {"RIGHT",controls.setListConfig,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
 	controls.labelConfig = new("LabelControl", {"LEFT", controls.setListConfig,"RIGHT"}, 5, 0, 0, 16, "^7Config Set")
