@@ -929,7 +929,7 @@ function buildMode:SyncLoadouts()
 						transferTable = {}
 					end
 				else
-					setList[setTitle] = true
+					setList[setTitle] = set
 				end
 			end
 		end
@@ -2383,48 +2383,56 @@ function buildMode:GetLoadoutList()
 	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
 	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
 
-	-- todo
-	-- -- loop over all for exact match loadouts
-	-- for id, tree in ipairs(treeList) do
-	-- 	if (oneItem or itemList[tree]) and (oneSkill or skillList[tree]) and (oneConfig or configList[tree]) then
-	-- 		t_insert(filteredList, tree)
-	-- 		t_insert(list, self:GetLoadoutInfo(linkId))
-	-- 	end
-	-- end
+	-- loop over all for exact match loadouts
+	for id, tree in ipairs(treeList) do
+		if (oneItem or itemList[tree]) and (oneSkill or skillList[tree]) and (oneConfig or configList[tree]) then
+			local loadout = {}
+			loadout.linkId = nil
+			loadout.setName = tree
 
+			loadout.treeSetId = treeList[tree]
+			loadout.itemSetId = oneItem and 1 or itemList[tree]
+			loadout.skillSetId = oneSkill and 1 or skillList[tree]
+			loadout.configSetId = oneConfig and 1 or configList[tree]
+
+			loadout.treeSet = self.treeTab.specList[loadout.treeSetId]
+			loadout.itemSet = self.itemsTab.itemSets[loadout.itemSetId]
+			loadout.skillSet = self.skillsTab.skillSets[loadout.skillSetId]
+			loadout.configSet = self.configTab.configSets[loadout.configSetId]
+			t_insert(list, loadout)
+		end
+	end
+
+	local list2 = {}
 	-- loop over the identifiers found within braces and set the loadout name to the TreeSet
 	for k, v in pairs(self.treeListSpecialLinks) do
 		local linkId = v.linkId
 		if ((oneItem or self.itemListSpecialLinks[linkId]) and (oneSkill or self.skillListSpecialLinks[linkId]) and (oneConfig or self.configListSpecialLinks[linkId])) then
-			t_insert(list, self:GetLoadoutInfo(linkId))
+			local loadout = {}
+			loadout.linkId = linkId
+			loadout.setName = self.treeListSpecialLinks[linkId].setName
+
+			loadout.treeSetId = self.treeListSpecialLinks[linkId].setId
+			loadout.itemSetId = oneItem and 1 or self.itemListSpecialLinks[linkId].setId
+			loadout.skillSetId = oneSkill and 1 or self.skillListSpecialLinks[linkId].setId
+			loadout.configSetId = oneConfig and 1 or self.configListSpecialLinks[linkId].setId
+
+			loadout.treeSet = self.treeTab.specList[loadout.treeSetId]
+			loadout.itemSet = self.itemsTab.itemSets[loadout.itemSetId]
+			loadout.skillSet = self.skillsTab.skillSets[loadout.skillSetId]
+			loadout.configSet = self.configTab.configSets[loadout.configSetId]
+			t_insert(list2, loadout)
 		end
 	end
-	table.sort(list, function (a,b)
+	table.sort(list2, function (a,b)
 		return a["treeSetId"] < b["treeSetId"]
 	end)
+
+	for k, loadout in ipairs(list2) do
+		t_insert(list, loadout)
+	end
+
 	return list
-end
-
-function buildMode:GetLoadoutInfo(linkId)
-	local oneItem = self.itemsTab and #self.itemsTab.itemSetOrderList == 1
-	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
-	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
-
-	local loadout = {}
-	loadout.linkId = linkId
-	loadout.setName = self.treeListSpecialLinks[linkId].setName
-
-	loadout.treeSetId = self.treeListSpecialLinks[linkId].setId
-	loadout.itemSetId = oneItem and 1 or self.itemListSpecialLinks[linkId].setId
-	loadout.skillSetId = oneSkill and 1 or self.skillListSpecialLinks[linkId].setId
-	loadout.configSetId = oneConfig and 1 or self.configListSpecialLinks[linkId].setId
-
-	loadout.treeSet = self.treeTab.specList[loadout.treeSetId]
-	loadout.itemSet = self.itemsTab.itemSets[loadout.itemSetId]
-	loadout.skillSet = self.skillsTab.skillSets[loadout.skillSetId]
-	loadout.configSet = self.configTab.configSets[loadout.configSetId]
-
-	return loadout
 end
 
 function RemoveLinkIdFromName(name, linkId)

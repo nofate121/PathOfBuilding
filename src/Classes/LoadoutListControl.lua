@@ -267,8 +267,12 @@ end
 
 function LoadoutListControlClass:GetRowValue(column, index, loadout)
 	local linkId = loadout.linkId
-	local tree = self.build.treeTab.specList[loadout.treeSetId]
-	return (self.build.treeListSpecialLinks[linkId]["setName"] .." {"..linkId.."}" or "Default")
+	if linkId then
+		return (loadout.setName .." {"..linkId.."}" or "Default")
+	else
+		local tree = loadout.treeSetId
+		return (loadout.setName or "Default")
+	end
 end
 
 function LoadoutListControlClass:OnSelClick(index, loadout, doubleClick)
