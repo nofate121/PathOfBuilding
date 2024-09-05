@@ -2187,13 +2187,56 @@ function buildMode:RenameLoadout()
 end
 
 -- if a setId is nil this will create a new set
-function buildMode:EditLoadout(linkId, newName, newTreeSetId, newItemSetId, newSkillSetId, newConfigSetId, shareTreeSet, shareItemSet, shareSkillSet, shareConfigSet)
-	local loadout = self:GetLoadoutInfo(linkId)
+function buildMode:EditLoadout(loadout, newName, newTreeSetId, newItemSetId, newSkillSetId, newConfigSetId, shareTreeSet, shareItemSet, shareSkillSet, shareConfigSet)
+	local linkId = loadout.linkId
 	local newLinkId = string.match(newName, "%{(%w+)%}")
+	local loadoutList = self:GetLoadoutList()
 
 	local oneItem = self.itemsTab and #self.itemsTab.itemSetOrderList == 1
 	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
 	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
+
+	local function addLinkIdToDefaultSet(setTypeStr, singleSetId)
+		for _, lo in ipairs(loadoutList) do
+			if singleSetId == lo[setTypeStr.."SetId"] then
+				-- this loudout uses the single set in question
+				if not lo.linkId then
+					-- if some loadouts don't have a linkId, give them one
+					local newLinkId = self:GetNextLoadoutLinkId()
+					lo.treeSet.title = AddLinkIdToName(lo.treeSet.title, newLinkId)
+					lo.itemSet.title = AddLinkIdToName(lo.itemSet.title, newLinkId)
+					lo.skillSet.title = AddLinkIdToName(lo.skillSet.title, newLinkId)
+					lo.configSet.title = AddLinkIdToName(lo.configSet.title, newLinkId)
+				else
+					-- add the linkId of all other loadouts which used it implicitly to the old set
+					lo[setTypeStr.."Set"].title = AddLinkIdToName(lo[setTypeStr.."Set"].title, lo.linkId)
+				end  
+			end
+		end
+	end
+
+	if oneItem and (not newItemSetId or not shareItemSet) then
+		-- all other loadouts used this one loadout as default, and we are creating a new set
+		-- so in order to not break those loadouts we have to: 
+		-- 1. if some don't have a linkId, give them one
+		-- 2. add the linkId of all loadouts which used it implicitly to the old set
+		addLinkIdToDefaultSet("item", loadout.itemSetId)
+	end
+	if oneSkill and (not newSkillSetId or not shareSkillSet) then
+		addLinkIdToDefaultSet("item", loadout.skillSetId)
+	end
+	if oneConfig and (not newConfigSetId or not shareConfigSet) then
+		addLinkIdToDefaultSet("config", loadout.configSetId)
+	end
+
+	
+	if not linkId then
+		-- todo
+	end
+	if not newLinkId then
+		newLinkId = self:GetNextLoadoutLinkId()
+		newName = newName .. " {"..newLinkId.."}"
+	end
 
 	local function setHelperFunc(setTypeStr, newSetId, shareSet, oneSet, setList, copySetFunc, newSetFunc)
 		if newSetId then
@@ -2227,17 +2270,7 @@ function buildMode:EditLoadout(linkId, newName, newTreeSetId, newItemSetId, newS
 	
 	setHelperFunc("config", newConfigSetId, shareConfigSet, oneConfig, self.configTab.configSets, function(id, name) return self.configTab:CopyConfigSet(id, name) end, function(id) return self.configTab:NewConfigSet(id) end)
 	
-
-	if oneItem and (not newItemSetId or not shareItemSet) then
-		-- all other loadouts used this one loadout as default, and we are creating a new set
-		-- so in order to not break those loadouts we have to: 
-		-- 1. if some don't have a linkId, give them one
-		-- 2. add the linkId of all loadouts which used it implicitly to the old set
-	end
-	if oneSkill and (not newSkillSetId or not shareSkillSet) then
-	end
-	if oneConfig and (not newConfigSetId or not shareConfigSet) then
-	end
+	
 
 end
 
@@ -2382,26 +2415,13 @@ function buildMode:GetLoadoutList()
 	return list
 end
 
-function buildMode:GetLoadoutInfo(linkId)
-	local oneItem = self.itemsTab and #self.itemsTab.itemSetOrderList == 1
-	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
-	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
-
-	local loadout = {}
-	loadout.linkId = linkId
-	loadout.setName = self.treeListSpecialLinks[linkId].setName
-
-	loadout.treeSetId = self.treeListSpecialLinks[linkId].setId
-	loadout.itemSetId = oneItem and 1 or self.itemListSpecialLinks[linkId].setId
-	loadout.skillSetId = oneSkill and 1 or self.skillListSpecialLinks[linkId].setId
-	loadout.configSetId = oneConfig and 1 or self.configListSpecialLinks[linkId].setId
-
-	loadout.treeSet = self.treeTab.specList[loadout.treeSetId]
-	loadout.itemSet = self.itemsTab.itemSets[loadout.itemSetId]
-	loadout.skillSet = self.skillsTab.skillSets[loadout.skillSetId]
-	loadout.configSet = self.configTab.configSets[loadout.configSetId]
-
-	return loadout
+function buildMode:GetNextLoadoutLinkId()
+	local loadoutList = self:GetLoadoutList()
+	local list = {}
+	for _, loadout in ipairs(list) do
+		t_insert(list, tonumber(loadout.linkId))
+	end
+	return math.max(unpack(list)) + 1
 end
 
 function RemoveLinkIdFromName(name, linkId)
@@ -2412,7 +2432,7 @@ end
 function AddLinkIdToName(name, linkId)
 	local linkIdentifier = string.match(name, "%{([%w,]+)%}")
 	if not linkIdentifier then
-		return name .. "{"..linkId.."}"
+		return name .. " {"..linkId.."}"
 	end
 	local linkIdList = {}
 	for id in string.gmatch(linkIdentifier, "[^%,]+") do
