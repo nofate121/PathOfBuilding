@@ -2419,7 +2419,12 @@ function buildMode:GetNextLoadoutLinkId()
 	local loadoutList = self:GetLoadoutList()
 	local list = {}
 	for _, loadout in ipairs(list) do
-		t_insert(list, tonumber(loadout.linkId))
+		if loadout.linkId then
+			local num = tonumber(loadout.linkId)
+			if num then
+				t_insert(list, num)
+			end
+		end
 	end
 	return math.max(unpack(list)) + 1
 end
