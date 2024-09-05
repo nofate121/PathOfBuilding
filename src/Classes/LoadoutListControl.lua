@@ -106,6 +106,11 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 		if value == "^7^7-----" then
 			controls.setListTree:SetSel(1)
 			return
+		elseif value == "^7^7New Tree Set" then
+			controls.checkShareTree.enabled = false
+			controls.checkShareTree.state = false
+		else
+			controls.checkShareTree.enabled = true
 		end
 	end)
 	local specNamesList = { }
@@ -113,7 +118,7 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 		t_insert(specNamesList, (spec.title or "Default"))
 	end
 	t_insert(specNamesList, "^7^7-----")
-	t_insert(specNamesList, "^7^7New Tree")
+	t_insert(specNamesList, "^7^7New Tree Set")
 	controls.setListTree.maxDroppedWidth = 1000
 	controls.setListTree.enableDroppedWidth = true
 	controls.setListTree:SetList(specNamesList)
@@ -129,6 +134,7 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 			tooltip:AddLine(16, "^7"..controls.setListTree:GetSelValue())
 		end
 	end
+	controls.checkShareTree = new("CheckBoxControl", {"RIGHT",controls.setListTree,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
 	controls.labelTree = new("LabelControl", {"LEFT", controls.setListTree,"RIGHT"}, 5, 0, 0, 16, "^7Tree Set")
 	
 
@@ -236,10 +242,12 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	controls.labelConfig = new("LabelControl", {"LEFT", controls.setListConfig,"RIGHT"}, 5, 0, 0, 16, "^7Config Set")
 	
 	if mode == "edit" then
+		controls.checkShareTree.state = true
 		controls.checkShareItem.state = true
 		controls.checkShareSkill.state = true
 		controls.checkShareConfig.state = true
 	elseif mode == "new" then
+		controls.checkShareTree.enabled = false
 		controls.checkShareItem.enabled = false
 		controls.checkShareSkill.enabled = false
 		controls.checkShareConfig.enabled = false
@@ -261,7 +269,7 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 				self.build.itemsTab.itemSetOrderList[controls.setListItem.selIndex],
 				self.build.skillsTab.skillSetOrderList[controls.setListSkill.selIndex],
 				self.build.configTab.configSetOrderList[controls.setListConfig.selIndex],
-				controls.checkShareItem.state, controls.checkShareSkill.state, controls.checkShareConfig.state
+				controls.checkShareTree.state, controls.checkShareItem.state, controls.checkShareSkill.state, controls.checkShareConfig.state
 			)
 		end
 

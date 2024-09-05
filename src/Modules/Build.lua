@@ -2187,7 +2187,7 @@ function buildMode:RenameLoadout()
 end
 
 -- if a setId is nil this will create a new set
-function buildMode:EditLoadout(linkId, newName, newTreeSetId, newItemSetId, newSkillSetId, newConfigSetId, shareItemSet, shareSkillSet, shareConfigSet)
+function buildMode:EditLoadout(linkId, newName, newTreeSetId, newItemSetId, newSkillSetId, newConfigSetId, shareTreeSet, shareItemSet, shareSkillSet, shareConfigSet)
 	local loadout = self:GetLoadoutInfo(linkId)
 	local newLinkId = string.match(newName, "%{(%w+)%}")
 
@@ -2195,91 +2195,38 @@ function buildMode:EditLoadout(linkId, newName, newTreeSetId, newItemSetId, newS
 	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
 	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
 
-	if newTreeSetId then
-		-- setId is not nil -> existing set will be used
-		if linkId ~= newLinkId or newTreeSetId ~= loadout.treeSetId then
-			-- either linkId changed or setId changed -> rename
-			-- this will break the loadout using this tree set previously
-
-			-- todo is there a way to fix this ?
-			-- todo allow copy tree here ?
-
-			loadout.treeSet.title = RemoveLinkIdFromName(loadout.treeSet.title, linkId)
-			local newTreeSet = self.treeTab.specList[newTreeSetId]
-			newTreeSet.title = AddLinkIdToName(newTreeSet.title, newLinkId)
+	local function setHelperFunc(setTypeStr, newSetId, shareSet, oneSet, setList, copySetFunc, newSetFunc)
+		if newSetId then
+			-- setId is not nil -> existing set will be used
+			if shareSet then
+				-- set will be shared between loadouts
+				if not oneSet and (linkId ~= newLinkId or newSetId ~= loadout[setTypeStr.."SetId"]) then
+					-- either linkId changed or setId changed (and there isn't only one set) -> rename
+					loadout[setTypeStr.."Set"].title = RemoveLinkIdFromName(loadout[setTypeStr.."Set"].title, linkId)
+					local newSet = setList[newSetId]
+					newSet.title = AddLinkIdToName(newSet.title, newLinkId)
+				end
+			else
+				-- instead of sharing a new copy of the set will be created
+				loadout[setTypeStr.."Set"].title = RemoveLinkIdFromName(loadout[setTypeStr.."Set"].title, linkId)
+				local newSet = copySetFunc(newSetId, newName)
+			end
+		else
+			-- setId is nil -> new set will be created and used
+			loadout[setTypeStr.."Set"].title = RemoveLinkIdFromName(loadout[setTypeStr.."Set"].title, linkId)
+			local newSet = newSetFunc(newSetId)
+			newSet.title = newName
 		end
-	else
-		-- setId is nil -> new set will be created and used
-		loadout.treeSet.title = RemoveLinkIdFromName(loadout.treeSet.title, linkId)
-		local newTree = self.treeTab:NewSpec(newTreeSetId)
-		newTree.title = newName
 	end
 	
-	if newItemSetId then
-		-- setId is not nil -> existing set will be used
-		if shareItemSet then
-			-- set will be shared between loadouts
-			if not oneItem and (linkId ~= newLinkId or newItemSetId ~= loadout.itemSetId) then
-				-- either linkId changed or setId changed (and there isn't only one set) -> rename
-				loadout.itemSet.title = RemoveLinkIdFromName(loadout.itemSet.title, linkId)
-				local newItemSet = self.itemsTab.itemSets[newItemSetId]
-				newItemSet.title = AddLinkIdToName(newItemSet.title, newLinkId)
-			end
-		else
-			-- instead of sharing a new copy of the set will be created
-			loadout.itemSet.title = RemoveLinkIdFromName(loadout.itemSet.title, linkId)
-			local newItem = self.itemsTab:CopyItemSet(newItemSetId, newName)
-		end
-	else
-		-- setId is nil -> new set will be created and used
-		loadout.itemSet.title = RemoveLinkIdFromName(loadout.itemSet.title, linkId)
-		local newItem = self.itemsTab:NewItemSet(newItemSetId)
-		newItem.title = newName
-	end
+	setHelperFunc("tree", newTreeSetId, shareTreeSet, false, self.treeTab.specList, function(id, name) return self.itemsTab:CopySpec(id, name) end, function(id) return self.treeTab:NewSpec(id) end)
 
-	if newSkillSetId then
-		-- setId is not nil -> existing set will be used
-		if shareSkillSet then
-			-- set will be shared between loadouts
-			if not oneSkill and (linkId ~= newLinkId or newSkillSetId ~= loadout.skillSetId) then
-				-- either linkId changed or setId changed (and there isn't only one set) -> rename
-				loadout.skillSet.title = RemoveLinkIdFromName(loadout.skillSet.title, linkId)
-				local newSkillSet = self.skillsTab.skillSets[newSkillSetId]
-				newSkillSet.title = AddLinkIdToName(newSkillSet.title, newLinkId)
-			end
-		else
-			-- instead of sharing a new copy of the set will be created
-			loadout.skillSet.title = RemoveLinkIdFromName(loadout.skillSet.title, linkId)
-			local newSkill = self.skillsTab:CopySkillSet(newSkillSetId, newName)
-		end
-	else
-		-- setId is nil -> new set will be created and used
-		loadout.skillSet.title = RemoveLinkIdFromName(loadout.skillSet.title, linkId)
-		local newSkill = self.skillsTab:NewSkillSet(newSkillSetId)
-		newSkill.title = newName
-	end
-
-	if newConfigSetId then
-		-- setId is not nil -> existing set will be used
-		if shareConfigSet then
-			-- set will be shared between loadouts
-			if not oneConfig and (linkId ~= newLinkId or newConfigSetId ~= loadout.configSetId) then
-				-- either linkId changed or setId changed (and there isn't only one set) -> rename
-				loadout.configSet.title = RemoveLinkIdFromName(loadout.configSet.title, linkId)
-				local newConfigSet = self.configTab.configSets[newConfigSetId]
-				newConfigSet.title = AddLinkIdToName(newConfigSet.title, newLinkId)
-			end
-		else
-			-- instead of sharing a new copy of the set will be created
-			loadout.configSet.title = RemoveLinkIdFromName(loadout.configSet.title, linkId)
-			local newConfig = self.configTab:CopyConfigSet(newConfigSetId, newName)
-		end
-	else
-		-- setId is nil -> new set will be created and used
-		loadout.configSet.title = RemoveLinkIdFromName(loadout.configSet.title, linkId)
-		local newConfig = self.configTab:NewConfigSet(newConfigSetId)
-		newConfig.title = newName
-	end
+	setHelperFunc("item", newItemSetId, shareItemSet, oneItem, self.itemsTab.itemSets, function(id, name) return self.itemsTab:CopyItemSet(id, name) end, function(id) return self.itemsTab:NewItemSet(id) end)
+	
+	setHelperFunc("skill", newSkillSetId, shareSkillSet, oneSkill, self.skillsTab.skillSets, function(id, name) return self.skillsTab:CopySkillSet(id, name) end, function(id) return self.skillsTab:NewSkillSet(id) end)
+	
+	setHelperFunc("config", newConfigSetId, shareConfigSet, oneConfig, self.configTab.configSets, function(id, name) return self.configTab:CopyConfigSet(id, name) end, function(id) return self.configTab:NewConfigSet(id) end)
+	
 
 	if oneItem and (not newItemSetId or not shareItemSet) then
 		-- all other loadouts used this one loadout as default, and we are creating a new set
@@ -2433,6 +2380,28 @@ function buildMode:GetLoadoutList()
 	end
 
 	return list
+end
+
+function buildMode:GetLoadoutInfo(linkId)
+	local oneItem = self.itemsTab and #self.itemsTab.itemSetOrderList == 1
+	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
+	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
+
+	local loadout = {}
+	loadout.linkId = linkId
+	loadout.setName = self.treeListSpecialLinks[linkId].setName
+
+	loadout.treeSetId = self.treeListSpecialLinks[linkId].setId
+	loadout.itemSetId = oneItem and 1 or self.itemListSpecialLinks[linkId].setId
+	loadout.skillSetId = oneSkill and 1 or self.skillListSpecialLinks[linkId].setId
+	loadout.configSetId = oneConfig and 1 or self.configListSpecialLinks[linkId].setId
+
+	loadout.treeSet = self.treeTab.specList[loadout.treeSetId]
+	loadout.itemSet = self.itemsTab.itemSets[loadout.itemSetId]
+	loadout.skillSet = self.skillsTab.skillSets[loadout.skillSetId]
+	loadout.configSet = self.configTab.configSets[loadout.configSetId]
+
+	return loadout
 end
 
 function RemoveLinkIdFromName(name, linkId)
