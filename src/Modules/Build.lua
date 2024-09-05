@@ -2370,16 +2370,26 @@ function buildMode:GetLoadoutList()
 			loadout.linkId = nil
 			loadout.setName = tree
 
-			loadout.treeSetId = treeList[tree]
-			loadout.itemSetId = oneItem and 1 or itemList[tree]
-			loadout.skillSetId = oneSkill and 1 or skillList[tree]
-			loadout.configSetId = oneConfig and 1 or configList[tree]
+			-- search id of treeSet
+			local treeSetId = nil
+			for k,v in ipairs(self.treeTab.specList) do
+				if v.title == tree then
+					treeSetId=k
+					break
+				end
+			end
+			if treeSetId then
+				loadout.treeSetId = treeSetId
+				loadout.itemSetId = oneItem and 1 or itemList[tree]
+				loadout.skillSetId = oneSkill and 1 or skillList[tree]
+				loadout.configSetId = oneConfig and 1 or configList[tree]
 
-			loadout.treeSet = self.treeTab.specList[loadout.treeSetId]
-			loadout.itemSet = self.itemsTab.itemSets[loadout.itemSetId]
-			loadout.skillSet = self.skillsTab.skillSets[loadout.skillSetId]
-			loadout.configSet = self.configTab.configSets[loadout.configSetId]
-			t_insert(list, loadout)
+				loadout.treeSet = self.treeTab.specList[loadout.treeSetId]
+				loadout.itemSet = self.itemsTab.itemSets[loadout.itemSetId]
+				loadout.skillSet = self.skillsTab.skillSets[loadout.skillSetId]
+				loadout.configSet = self.configTab.configSets[loadout.configSetId]
+				t_insert(list, loadout)
+			end
 		end
 	end
 
