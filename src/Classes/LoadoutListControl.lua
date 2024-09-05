@@ -81,10 +81,7 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	local controls = { }
 	controls.label = new("LabelControl", nil, 0, 20, 0, 16, "^7Enter name for loadout:")
 	-- automatically select next free set link number
-	local nextFreeId = 1
-	while self.list[nextFreeId] do
-		nextFreeId = nextFreeId + 1
-	end
+	local nextFreeId = self.build:GetNextLoadoutLinkId()
 	local loadoutName = ""
 	if mode == "new" then
 		loadoutName = "New Loadout" .. " {" .. nextFreeId .. "}"

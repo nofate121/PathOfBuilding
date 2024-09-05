@@ -2428,7 +2428,7 @@ end
 function buildMode:GetNextLoadoutLinkId()
 	local loadoutList = self:GetLoadoutList()
 	local list = {}
-	for _, loadout in ipairs(list) do
+	for _, loadout in ipairs(loadoutList) do
 		if loadout.linkId then
 			local num = tonumber(loadout.linkId)
 			if num then
@@ -2436,7 +2436,11 @@ function buildMode:GetNextLoadoutLinkId()
 			end
 		end
 	end
-	return math.max(unpack(list)) + 1
+	if #list < 1 then
+		return 1
+	else
+		return math.max(unpack(list)) + 1
+	end
 end
 
 function RemoveLinkIdFromName(name, linkId)
