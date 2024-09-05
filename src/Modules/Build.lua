@@ -2230,12 +2230,13 @@ function buildMode:EditLoadout(loadout, newName, newTreeSetId, newItemSetId, new
 	end
 
 	
-	if not linkId then
-		-- todo
-	end
-	if not newLinkId then
+	if  not newLinkId then
 		newLinkId = self:GetNextLoadoutLinkId()
 		newName = newName .. " {"..newLinkId.."}"
+	end
+	if not linkId then
+		-- todo
+		
 	end
 
 	local function setHelperFunc(setTypeStr, newSetId, shareSet, oneSet, setList, copySetFunc, newSetFunc)
@@ -2245,18 +2246,24 @@ function buildMode:EditLoadout(loadout, newName, newTreeSetId, newItemSetId, new
 				-- set will be shared between loadouts
 				if not oneSet and (linkId ~= newLinkId or newSetId ~= loadout[setTypeStr.."SetId"]) then
 					-- either linkId changed or setId changed (and there isn't only one set) -> rename
-					loadout[setTypeStr.."Set"].title = RemoveLinkIdFromName(loadout[setTypeStr.."Set"].title, linkId)
+					if linkId then
+						loadout[setTypeStr.."Set"].title = RemoveLinkIdFromName(loadout[setTypeStr.."Set"].title, linkId)
+					end
 					local newSet = setList[newSetId]
 					newSet.title = AddLinkIdToName(newSet.title, newLinkId)
 				end
 			else
 				-- instead of sharing a new copy of the set will be created
-				loadout[setTypeStr.."Set"].title = RemoveLinkIdFromName(loadout[setTypeStr.."Set"].title, linkId)
+				if linkId then
+					loadout[setTypeStr.."Set"].title = RemoveLinkIdFromName(loadout[setTypeStr.."Set"].title, linkId)
+				end
 				local newSet = copySetFunc(newSetId, newName)
 			end
 		else
 			-- setId is nil -> new set will be created and used
-			loadout[setTypeStr.."Set"].title = RemoveLinkIdFromName(loadout[setTypeStr.."Set"].title, linkId)
+			if linkId then
+				loadout[setTypeStr.."Set"].title = RemoveLinkIdFromName(loadout[setTypeStr.."Set"].title, linkId)
+			end
 			local newSet = newSetFunc(newSetId)
 			newSet.title = newName
 		end

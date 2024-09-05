@@ -86,7 +86,11 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	if mode == "new" then
 		loadoutName = "New Loadout" .. " {" .. nextFreeId .. "}"
 	elseif mode == "edit" then
-		loadoutName = loadout.setName .. " {" .. loadout.linkId .. "}"
+		if loadout.linkId then
+			loadoutName = loadout.setName .. " {" .. loadout.linkId .. "}"
+		else
+			loadoutName = loadout.setName
+		end
 	elseif mode == "copy" then
 		loadoutName = "Copy of " .. loadout.setName .. " {" .. nextFreeId .. "}"
 	end
