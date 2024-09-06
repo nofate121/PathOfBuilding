@@ -2196,6 +2196,7 @@ function buildMode:EditLoadout(loadout, newName, newTreeSetId, newItemSetId, new
 	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
 	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
 
+	local currentLoadoutNewLinkId = nil
 	local function addLinkIdToDefaultSet(setTypeStr, singleSetId)
 		for _, lo in ipairs(loadoutList) do
 			if singleSetId == lo[setTypeStr.."SetId"] then
@@ -2207,6 +2208,9 @@ function buildMode:EditLoadout(loadout, newName, newTreeSetId, newItemSetId, new
 					lo.itemSet.title = AddLinkIdToName(lo.itemSet.title, newLinkId)
 					lo.skillSet.title = AddLinkIdToName(lo.skillSet.title, newLinkId)
 					lo.configSet.title = AddLinkIdToName(lo.configSet.title, newLinkId)
+					if lo.setName == loadout.setName then
+						currentLoadoutNewLinkId = newLinkId
+					end
 				else
 					-- add the linkId of all other loadouts which used it implicitly to the old set
 					lo[setTypeStr.."Set"].title = AddLinkIdToName(lo[setTypeStr.."Set"].title, lo.linkId)
@@ -2229,14 +2233,20 @@ function buildMode:EditLoadout(loadout, newName, newTreeSetId, newItemSetId, new
 		addLinkIdToDefaultSet("config", loadout.configSetId)
 	end
 
+	if currentLoadoutNewLinkId then
+		-- the loadout we want to edit received a new linkId in any addLinkIdToDefaultSet step when it didn't have any previously
+		linkId = currentLoadoutNewLinkId
+		loadout.linkId = currentLoadoutNewLinkId
+		if not newLinkId then
+			newLinkId = linkId
+			newName = newName .. " {"..newLinkId.."}"
+		end
+	end
+
 	
-	if  not newLinkId then
+	if not newLinkId then
 		newLinkId = self:GetNextLoadoutLinkId()
 		newName = newName .. " {"..newLinkId.."}"
-	end
-	if not linkId then
-		-- todo
-		
 	end
 
 	local function setHelperFunc(setTypeStr, newSetId, shareSet, oneSet, setList, copySetFunc, newSetFunc)
@@ -2444,9 +2454,9 @@ function buildMode:GetNextLoadoutLinkId()
 		end
 	end
 	if #list < 1 then
-		return 1
+		return "1"
 	else
-		return math.max(unpack(list)) + 1
+		return tostring(math.max(unpack(list)) + 1)
 	end
 end
 
