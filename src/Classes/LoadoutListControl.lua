@@ -123,10 +123,10 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	controls.setListTree.maxDroppedWidth = 1000
 	controls.setListTree.enableDroppedWidth = true
 	controls.setListTree:SetList(specNamesList)
-	local initialTreeIndex = loadout.treeSetId
 	if mode == "new" then
 		controls.setListTree:SetSel(#controls.setListTree.list, true)
 	else
+		local initialTreeIndex = loadout.treeSetId
 		controls.setListTree:SetSel(initialTreeIndex, true)
 	end
 	controls.setListTree.tooltipFunc = function(tooltip, mode, index, value)
@@ -157,10 +157,10 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	controls.setListItem.maxDroppedWidth = 1000
 	controls.setListItem.enableDroppedWidth = true
 	controls.setListItem:SetList(itemNames)
-	local initialItemIndex = isValueInArray(self.build.itemsTab.itemSetOrderList, loadout.itemSetId)
 	if mode == "new" then
 		controls.setListItem:SetSel(#controls.setListItem.list, true)
 	else
+		local initialItemIndex = isValueInArray(self.build.itemsTab.itemSetOrderList, loadout.itemSetId)
 		controls.setListItem:SetSel(initialItemIndex, true)
 	end
 	controls.setListItem.tooltipFunc = function(tooltip, mode, index, value)
@@ -191,10 +191,10 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	controls.setListSkill.maxDroppedWidth = 1000
 	controls.setListSkill.enableDroppedWidth = true
 	controls.setListSkill:SetList(skillNames)
-	local initialSkillIndex = isValueInArray(self.build.skillsTab.skillSetOrderList, loadout.skillSetId)
 	if mode == "new" then
 		controls.setListSkill:SetSel(#controls.setListSkill.list, true)
 	else
+		local initialSkillIndex = isValueInArray(self.build.skillsTab.skillSetOrderList, loadout.skillSetId)
 		controls.setListSkill:SetSel(initialSkillIndex, true)
 	end
 	controls.setListSkill.tooltipFunc = function(tooltip, mode, index, value)
@@ -227,10 +227,10 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	controls.setListConfig.maxDroppedWidth = 1000
 	controls.setListConfig.enableDroppedWidth = true
 	controls.setListConfig:SetList(configNames)
-	local initialConfigIndex = isValueInArray(self.build.configTab.configSetOrderList, loadout.configSetId)
 	if mode == "new" then
 		controls.setListConfig:SetSel(#controls.setListConfig.list, true)
 	else
+		local initialConfigIndex = isValueInArray(self.build.configTab.configSetOrderList, loadout.configSetId)
 		controls.setListConfig:SetSel(initialConfigIndex, true)
 	end
 	controls.setListConfig.tooltipFunc = function(tooltip, mode, index, value)
@@ -256,20 +256,22 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 
 	controls.save = new("ButtonControl", {"TOP",controls.setListConfig,"BOTTOM"}, -45, 20, 80, 20, "Save", function()
 		local newName = controls.edit.buf
+		local treeSetId = nil
+		if controls.setListTree.selIndex <= #self.build.treeTab.specList then
+			treeSetId = controls.setListTree.selIndex
+		end
 
 		if mode == "new" or mode == "copy"  then
-			
-			self.build:ManageLoadout(nil, newName, controls.setListTree.selIndex, 
+			self.build:ManageLoadout(nil, newName, treeSetId, 
 				self.build.itemsTab.itemSetOrderList[controls.setListItem.selIndex],
 				self.build.skillsTab.skillSetOrderList[controls.setListSkill.selIndex],
 				self.build.configTab.configSetOrderList[controls.setListConfig.selIndex],
 				controls.checkShareTree.state, controls.checkShareItem.state, controls.checkShareSkill.state, controls.checkShareConfig.state
 			)
-
 		elseif mode == "edit" then
 			-- if New Tree Set is selected (or New Item Set etc.) it won't be found in the setorderlist, 
 			-- thus nil will be passed to the function call requesting to create one
-			self.build:ManageLoadout(loadout, newName, controls.setListTree.selIndex, 
+			self.build:ManageLoadout(loadout, newName, treeSetId, 
 				self.build.itemsTab.itemSetOrderList[controls.setListItem.selIndex],
 				self.build.skillsTab.skillSetOrderList[controls.setListSkill.selIndex],
 				self.build.configTab.configSetOrderList[controls.setListConfig.selIndex],
@@ -321,6 +323,7 @@ function LoadoutListControlClass:OnSelDelete(index, loadout)
 		main:OpenConfirmPopup("Delete Loadout", "Are you sure you want to delete '"..(loadout.setName or "Default").."' and all sets exclusive to it ?", "Delete", function()
 			self.build:DeleteLoadout(loadout)
 			self.list = self.build:GetLoadoutList()
+			self:SelectIndex(nil)
 		end)
 	end
 end
