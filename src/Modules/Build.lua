@@ -2296,25 +2296,12 @@ function buildMode:DeleteLoadout(loadout)
 	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
 	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
 
-	local specId = findNamedSetId(self.treeTab:GetSpecList(), loadout, self.treeListSpecialLinks)
-	local itemSetId = oneItem and 1 or findSetId(self.itemsTab.itemSetOrderList, loadout, self.itemsTab.itemSets, self.itemListSpecialLinks)
-	local skillSetId = oneSkill and 1 or findSetId(self.skillsTab.skillSetOrderList, loadout, self.skillsTab.skillSets, self.skillListSpecialLinks)
-	local configSetId = oneConfig and 1 or findSetId(self.configTab.configSetOrderList, loadout, self.configTab.configSets, self.configListSpecialLinks)
+	local loadoutList = self:GetLoadoutList()
 
-	local spec = self.treeTab.specList[specId]
-	local itemSet = self.itemsTab.itemSets[itemSetId]
-	local skillSet = self.skillsTab.skillSets[skillSetId]
-	local configSet = self.configTab.configSets[configSetId]
-
-	-- if exact match nor special grouping cannot find setIds, bail
-	if specId == nil or itemSetId == nil or skillSetId == nil or configSetId == nil then
-		return false
-	end
-
-	local function isExclusiveSet(setId, setSpecialLinks)
+	local function isExclusiveSet(setTypeStr, setId)
 		local count = 0
-		for k, v in pairs(setSpecialLinks) do
-			if setId == v["setId"] then
+		for _, lo in ipairs(loadoutList) do
+			if setId == lo[setTypeStr.."SetId"] then
 				count = count + 1
 			end
 			if count > 1 then
@@ -2323,35 +2310,39 @@ function buildMode:DeleteLoadout(loadout)
 		end
 		return true
 	end
-
-	-- this should be 	(string = "abc {4,5,6}", id = 5) -> "abc {4,6}"
-	-- 				    (string = "abc {5,6}", id = 5) -> "abc {6}"
-	-- 					(string = "abc {4,5}", id = 5) -> "abc {4}"
-	local function replaceSetId(string, id)
-		return string:gsub("%{"..id..",(.+)%}", "{%1}"):gsub("%{(.+),"..id.."%}", "{%1}"):gsub("%{(.+),"..id.."(,.+)%}", "{%1%2}")
-	end
 	
-	local linkIdentifier = string.match(loadout, "%{(%w+)%}")
-
-	self.treeTab:DeleteSpec(specId)
-
 	-- delete sets if it is not the only set of that type and is exclusive, otherwise (it is shared) rename it instead
-	if not oneItem and isExclusiveSet(itemSetId, self.itemListSpecialLinks) then
+	if isExclusiveSet("tree", loadout.treeSetId) then
+		self.treeTab:DeleteSpec(loadout.treeSetId)
+	else
+		if loadout.linkId then
+			loadout.treeSet.title = RemoveLinkIdFromName(loadout.treeSet.title, loadout.linkId)
+		end
+	end
+	if not oneItem and isExclusiveSet("item", loadout.itemSetId) then
 		-- delete
-		self.itemsTab:DeleteItemSet(itemSetId)
+		self.itemsTab:DeleteItemSet(loadout.itemSetId)
 	else 
 		-- rename
-		itemSet.title = replaceSetId(itemSet.title, linkIdentifier)
+		if loadout.linkId then
+			loadout.itemSet.title = RemoveLinkIdFromName(loadout.itemSet.title, loadout.linkId)
+		end
 	end
-	if not oneSkill and isExclusiveSet(skillSetId, self.skillListSpecialLinks) then
-		self.skillsTab:DeleteSkillSet(skillSetId)
+	if not oneSkill and isExclusiveSet("skill", loadout.skillSetId) then
+		if loadout.linkId then
+			self.skillsTab:DeleteSkillSet(loadout.skillSetId)
+		end
 	else 
-		skillSet.title = replaceSetId(skillSet.title, linkIdentifier)
+		if loadout.linkId then
+			loadout.skillSet.title = RemoveLinkIdFromName(loadout.skillSet.title, loadout.linkId)
+		end
 	end
-	if not oneConfig and isExclusiveSet(configSetId, self.configListSpecialLinks) then
-		self.configTab:DeleteConfigSet(configSetId)
+	if not oneConfig and isExclusiveSet("config", loadout.configSetId) then
+		self.configTab:DeleteConfigSet(loadout.configSetId)
 	else
-		configSet.title = replaceSetId(configSet.title, linkIdentifier)
+		if loadout.linkId then
+			loadout.configSet.title = RemoveLinkIdFromName(loadout.configSet.title, loadout.linkId)
+		end
 	end
 
 

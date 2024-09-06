@@ -275,7 +275,6 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 		end
 
 
-		self.build:SyncLoadouts()
 		self.list = self.build:GetLoadoutList()
 
 		main:ClosePopup()
@@ -316,9 +315,9 @@ end
 
 function LoadoutListControlClass:OnSelDelete(index, loadout)
 	if #self.list > 1 then
-		main:OpenConfirmPopup("Delete Loadout", "Are you sure you want to delete '"..(loadout or "Default").."' and all sets exclusive to it ?", "Delete", function()
-			t_remove(self.list, index)
+		main:OpenConfirmPopup("Delete Loadout", "Are you sure you want to delete '"..(loadout.setName or "Default").."' and all sets exclusive to it ?", "Delete", function()
 			self.build:DeleteLoadout(loadout)
+			self.list = self.build:GetLoadoutList()
 		end)
 	end
 end
