@@ -2225,12 +2225,12 @@ function buildMode:EditLoadout(loadout, newName, newTreeSetId, newItemSetId, new
 		-- 1. if some don't have a linkId, give them one
 		-- 2. add the linkId of all loadouts which used it implicitly to the old set
 		addLinkIdToDefaultSet("item", loadout.itemSetId)
+		loadoutList = self:GetLoadoutList()
 	end
-	loadoutList = self:GetLoadoutList()
 	if oneSkill and (not newSkillSetId or not shareSkillSet) then
 		addLinkIdToDefaultSet("skill", loadout.skillSetId)
+		loadoutList = self:GetLoadoutList()
 	end
-	loadoutList = self:GetLoadoutList()
 	if oneConfig and (not newConfigSetId or not shareConfigSet) then
 		addLinkIdToDefaultSet("config", loadout.configSetId)
 	end
@@ -2474,7 +2474,9 @@ function AddLinkIdToName(name, linkId)
 	end
 	local linkIdList = {}
 	for id in string.gmatch(linkIdentifier, "[^%,]+") do
-		t_insert(linkIdList, id)
+		if id ~= linkId then
+			t_insert(linkIdList, id)
+		end
 	end
 	t_insert(linkIdList, linkId)
 	table.sort(linkIdList)
