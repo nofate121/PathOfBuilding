@@ -2203,18 +2203,18 @@ function buildMode:EditLoadout(loadout, newName, newTreeSetId, newItemSetId, new
 				-- this loudout uses the single set in question
 				if not lo.linkId then
 					-- if some loadouts don't have a linkId, give them one
-					local newLinkId = self:GetNextLoadoutLinkId()
-					lo.treeSet.title = AddLinkIdToName(lo.treeSet.title, newLinkId)
-					lo.itemSet.title = AddLinkIdToName(lo.itemSet.title, newLinkId)
-					lo.skillSet.title = AddLinkIdToName(lo.skillSet.title, newLinkId)
-					lo.configSet.title = AddLinkIdToName(lo.configSet.title, newLinkId)
+					local nextLinkId = self:GetNextLoadoutLinkId()
+					lo.treeSet.title = AddLinkIdToName(lo.treeSet.title, nextLinkId)
+					lo.itemSet.title = AddLinkIdToName(lo.itemSet.title, nextLinkId)
+					lo.skillSet.title = AddLinkIdToName(lo.skillSet.title, nextLinkId)
+					lo.configSet.title = AddLinkIdToName(lo.configSet.title, nextLinkId)
 					if lo.setName == loadout.setName then
-						currentLoadoutNewLinkId = newLinkId
+						currentLoadoutNewLinkId = nextLinkId
 					end
 				else
 					-- add the linkId of all other loadouts which used it implicitly to the old set
 					lo[setTypeStr.."Set"].title = AddLinkIdToName(lo[setTypeStr.."Set"].title, lo.linkId)
-				end  
+				end
 			end
 		end
 	end
@@ -2280,16 +2280,14 @@ function buildMode:EditLoadout(loadout, newName, newTreeSetId, newItemSetId, new
 			newSet.title = newName
 		end
 	end
-	
+
 	setHelperFunc("tree", newTreeSetId, shareTreeSet, false, self.treeTab.specList, function(id, name) return self.itemsTab:CopySpec(id, name) end, function(id) return self.treeTab:NewSpec(id) end)
 
 	setHelperFunc("item", newItemSetId, shareItemSet, oneItem, self.itemsTab.itemSets, function(id, name) return self.itemsTab:CopyItemSet(id, name) end, function(id) return self.itemsTab:NewItemSet(id) end)
-	
+
 	setHelperFunc("skill", newSkillSetId, shareSkillSet, oneSkill, self.skillsTab.skillSets, function(id, name) return self.skillsTab:CopySkillSet(id, name) end, function(id) return self.skillsTab:NewSkillSet(id) end)
-	
+
 	setHelperFunc("config", newConfigSetId, shareConfigSet, oneConfig, self.configTab.configSets, function(id, name) return self.configTab:CopyConfigSet(id, name) end, function(id) return self.configTab:NewConfigSet(id) end)
-	
-	
 
 end
 
@@ -2484,7 +2482,7 @@ function AddLinkIdToName(name, linkId)
 	local firstloop = true
 	for _, id in ipairs(linkIdList) do
 		if firstloop then
-			newLinkIdString = newLinkIdString .. id 
+			newLinkIdString = newLinkIdString .. id
 			firstloop = false
 		else
 			newLinkIdString = newLinkIdString .. "," .. id
