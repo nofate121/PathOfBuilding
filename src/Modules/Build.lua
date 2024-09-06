@@ -2227,7 +2227,7 @@ function buildMode:EditLoadout(loadout, newName, newTreeSetId, newItemSetId, new
 		addLinkIdToDefaultSet("item", loadout.itemSetId)
 	end
 	if oneSkill and (not newSkillSetId or not shareSkillSet) then
-		addLinkIdToDefaultSet("item", loadout.skillSetId)
+		addLinkIdToDefaultSet("skill", loadout.skillSetId)
 	end
 	if oneConfig and (not newConfigSetId or not shareConfigSet) then
 		addLinkIdToDefaultSet("config", loadout.configSetId)
