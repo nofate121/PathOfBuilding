@@ -2281,7 +2281,7 @@ function buildMode:EditLoadout(loadout, newName, newTreeSetId, newItemSetId, new
 		end
 	end
 
-	setHelperFunc("tree", newTreeSetId, shareTreeSet, false, self.treeTab.specList, function(id, name) return self.itemsTab:CopySpec(id, name) end, function(id) return self.treeTab:NewSpec(id) end)
+	setHelperFunc("tree", newTreeSetId, shareTreeSet, false, self.treeTab.specList, function(id, name) return self.treeTab:CopySpec(id, name) end, function(id) return self.treeTab:NewSpec(id) end)
 
 	setHelperFunc("item", newItemSetId, shareItemSet, oneItem, self.itemsTab.itemSets, function(id, name) return self.itemsTab:CopyItemSet(id, name) end, function(id) return self.itemsTab:NewItemSet(id) end)
 
