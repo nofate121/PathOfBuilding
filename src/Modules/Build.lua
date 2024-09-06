@@ -2397,9 +2397,9 @@ function buildMode:GetLoadoutList()
 			end
 			if treeSetId then
 				loadout.treeSetId = treeSetId
-				loadout.itemSetId = oneItem and 1 or itemList[tree]
-				loadout.skillSetId = oneSkill and 1 or skillList[tree]
-				loadout.configSetId = oneConfig and 1 or configList[tree]
+				loadout.itemSetId = oneItem and self.itemsTab.itemSetOrderList[1] or itemList[tree]
+				loadout.skillSetId = oneSkill and self.skillsTab.skillSetOrderList[1] or skillList[tree]
+				loadout.configSetId = oneConfig and self.configTab.configSetOrderList[1] or configList[tree]
 
 				loadout.treeSet = self.treeTab.specList[loadout.treeSetId]
 				loadout.itemSet = self.itemsTab.itemSets[loadout.itemSetId]
@@ -2420,9 +2420,9 @@ function buildMode:GetLoadoutList()
 			loadout.setName = self.treeListSpecialLinks[linkId].setName
 
 			loadout.treeSetId = self.treeListSpecialLinks[linkId].setId
-			loadout.itemSetId = oneItem and 1 or self.itemListSpecialLinks[linkId].setId
-			loadout.skillSetId = oneSkill and 1 or self.skillListSpecialLinks[linkId].setId
-			loadout.configSetId = oneConfig and 1 or self.configListSpecialLinks[linkId].setId
+			loadout.itemSetId = oneItem and self.itemsTab.itemSetOrderList[1] or self.itemListSpecialLinks[linkId].setId
+			loadout.skillSetId = oneSkill and self.skillsTab.skillSetOrderList[1] or self.skillListSpecialLinks[linkId].setId
+			loadout.configSetId = oneConfig and self.configTab.configSetOrderList[1] or self.configListSpecialLinks[linkId].setId
 
 			loadout.treeSet = self.treeTab.specList[loadout.treeSetId]
 			loadout.itemSet = self.itemsTab.itemSets[loadout.itemSetId]
