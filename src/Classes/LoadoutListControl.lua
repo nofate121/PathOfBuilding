@@ -257,16 +257,19 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	controls.save = new("ButtonControl", {"TOP",controls.setListConfig,"BOTTOM"}, -45, 20, 80, 20, "Save", function()
 		local newName = controls.edit.buf
 
-		if mode == "new" then
+		if mode == "new" or mode == "copy"  then
 			
-
-		elseif mode == "copy" then
-			
+			self.build:ManageLoadout(nil, newName, controls.setListTree.selIndex, 
+				self.build.itemsTab.itemSetOrderList[controls.setListItem.selIndex],
+				self.build.skillsTab.skillSetOrderList[controls.setListSkill.selIndex],
+				self.build.configTab.configSetOrderList[controls.setListConfig.selIndex],
+				controls.checkShareTree.state, controls.checkShareItem.state, controls.checkShareSkill.state, controls.checkShareConfig.state
+			)
 
 		elseif mode == "edit" then
 			-- if New Tree Set is selected (or New Item Set etc.) it won't be found in the setorderlist, 
 			-- thus nil will be passed to the function call requesting to create one
-			self.build:EditLoadout(loadout, newName, controls.setListTree.selIndex, 
+			self.build:ManageLoadout(loadout, newName, controls.setListTree.selIndex, 
 				self.build.itemsTab.itemSetOrderList[controls.setListItem.selIndex],
 				self.build.skillsTab.skillSetOrderList[controls.setListSkill.selIndex],
 				self.build.configTab.configSetOrderList[controls.setListConfig.selIndex],

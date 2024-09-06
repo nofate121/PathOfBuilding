@@ -2187,8 +2187,9 @@ function buildMode:RenameLoadout()
 end
 
 -- if a setId is nil this will create a new set
-function buildMode:EditLoadout(loadout, newName, newTreeSetId, newItemSetId, newSkillSetId, newConfigSetId, shareTreeSet, shareItemSet, shareSkillSet, shareConfigSet)
-	local linkId = loadout.linkId
+-- loadout should be nil when you want to copy or create new loadout
+function buildMode:ManageLoadout(loadout, newName, newTreeSetId, newItemSetId, newSkillSetId, newConfigSetId, shareTreeSet, shareItemSet, shareSkillSet, shareConfigSet)
+	local linkId = loadout and loadout.linkId or nil
 	local newLinkId = string.match(newName, "%{(%w+)%}")
 	local loadoutList = self:GetLoadoutList()
 
@@ -2208,7 +2209,7 @@ function buildMode:EditLoadout(loadout, newName, newTreeSetId, newItemSetId, new
 					lo.itemSet.title = AddLinkIdToName(lo.itemSet.title, nextLinkId)
 					lo.skillSet.title = AddLinkIdToName(lo.skillSet.title, nextLinkId)
 					lo.configSet.title = AddLinkIdToName(lo.configSet.title, nextLinkId)
-					if lo.setName == loadout.setName then
+					if loadout and lo.setName == loadout.setName then
 						currentLoadoutNewLinkId = nextLinkId
 					end
 				else
@@ -2224,18 +2225,18 @@ function buildMode:EditLoadout(loadout, newName, newTreeSetId, newItemSetId, new
 		-- so in order to not break those loadouts we have to: 
 		-- 1. if some don't have a linkId, give them one
 		-- 2. add the linkId of all loadouts which used it implicitly to the old set
-		addLinkIdToDefaultSet("item", loadout.itemSetId)
+		addLinkIdToDefaultSet("item", self.itemsTab.itemSetOrderList[1])
 		loadoutList = self:GetLoadoutList()
 	end
 	if oneSkill and (not newSkillSetId or not shareSkillSet) then
-		addLinkIdToDefaultSet("skill", loadout.skillSetId)
+		addLinkIdToDefaultSet("skill", self.skillsTab.skillSetOrderList[1])
 		loadoutList = self:GetLoadoutList()
 	end
 	if oneConfig and (not newConfigSetId or not shareConfigSet) then
-		addLinkIdToDefaultSet("config", loadout.configSetId)
+		addLinkIdToDefaultSet("config", self.configTab.configSetOrderList[1])
 	end
 
-	if currentLoadoutNewLinkId then
+	if loadout and currentLoadoutNewLinkId then
 		-- the loadout we want to edit received a new linkId in any addLinkIdToDefaultSet step when it didn't have any previously
 		linkId = currentLoadoutNewLinkId
 		loadout.linkId = currentLoadoutNewLinkId
@@ -2256,7 +2257,7 @@ function buildMode:EditLoadout(loadout, newName, newTreeSetId, newItemSetId, new
 			-- setId is not nil -> existing set will be used
 			if shareSet then
 				-- set will be shared between loadouts
-				if not oneSet and (linkId ~= newLinkId or newSetId ~= loadout[setTypeStr.."SetId"]) then
+				if not oneSet and (linkId ~= newLinkId or loadout and newSetId ~= loadout[setTypeStr.."SetId"]) then
 					-- either linkId changed or setId changed (and there isn't only one set) -> rename
 					if linkId then
 						loadout[setTypeStr.."Set"].title = RemoveLinkIdFromName(loadout[setTypeStr.."Set"].title, linkId)
@@ -2266,14 +2267,14 @@ function buildMode:EditLoadout(loadout, newName, newTreeSetId, newItemSetId, new
 				end
 			else
 				-- instead of sharing a new copy of the set will be created
-				if linkId then
+				if linkId and loadout then
 					loadout[setTypeStr.."Set"].title = RemoveLinkIdFromName(loadout[setTypeStr.."Set"].title, linkId)
 				end
 				local newSet = copySetFunc(newSetId, newName)
 			end
 		else
 			-- setId is nil -> new set will be created and used
-			if linkId then
+			if linkId and loadout then
 				loadout[setTypeStr.."Set"].title = RemoveLinkIdFromName(loadout[setTypeStr.."Set"].title, linkId)
 			end
 			local newSet = newSetFunc(newSetId)
