@@ -2226,9 +2226,11 @@ function buildMode:EditLoadout(loadout, newName, newTreeSetId, newItemSetId, new
 		-- 2. add the linkId of all loadouts which used it implicitly to the old set
 		addLinkIdToDefaultSet("item", loadout.itemSetId)
 	end
+	loadoutList = self:GetLoadoutList()
 	if oneSkill and (not newSkillSetId or not shareSkillSet) then
 		addLinkIdToDefaultSet("skill", loadout.skillSetId)
 	end
+	loadoutList = self:GetLoadoutList()
 	if oneConfig and (not newConfigSetId or not shareConfigSet) then
 		addLinkIdToDefaultSet("config", loadout.configSetId)
 	end
@@ -2462,7 +2464,7 @@ end
 
 function RemoveLinkIdFromName(name, linkId)
 	return name:gsub("%{"..linkId..",(.+)%}", "{%1}"):gsub("%{(.+),"..linkId.."%}", "{%1}")
-		:gsub("%{(.+),"..linkId.."(,.+)%}", "{%1%2}"):gsub("%{"..linkId.."%}", "")
+		:gsub("%{(.+),"..linkId.."(,.+)%}", "{%1%2}"):gsub("%s*%{"..linkId.."%}", "")
 end
 
 function AddLinkIdToName(name, linkId)
