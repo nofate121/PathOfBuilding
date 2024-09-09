@@ -2330,9 +2330,7 @@ function buildMode:DeleteLoadout(loadout)
 		end
 	end
 	if not oneSkill and isExclusiveSet("skill", loadout.skillSetId) then
-		if loadout.linkId then
-			self.skillsTab:DeleteSkillSet(loadout.skillSetId)
-		end
+		self.skillsTab:DeleteSkillSet(loadout.skillSetId)
 	else 
 		if loadout.linkId then
 			loadout.skillSet.title = RemoveLinkIdFromName(loadout.skillSet.title, loadout.linkId)
