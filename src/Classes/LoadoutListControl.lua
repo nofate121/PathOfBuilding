@@ -13,8 +13,6 @@ local LoadoutListControlClass = newClass("LoadoutListControl", "ListControl", fu
 	self.ListControl(anchor, x, y, width, height, 16, "VERTICAL", false, loadoutlist)
 	self.build = build
 	self.controls.copy = new("ButtonControl", {"BOTTOM",self,"TOP"}, 0, -4, 60, 18, "Copy", function()
-		-- local newLoadout = self.build:CopyLoadout(self.selValue)
-		-- self:RenameLoadout(newLoadout, "Copy Loadout", true)
 		self:LoadoutPopup(self.selValue, "copy")
 	end)
 	self.controls.copy.enabled = function()
@@ -33,8 +31,6 @@ local LoadoutListControlClass = newClass("LoadoutListControl", "ListControl", fu
 		return self.selValue ~= nil
 	end
 	self.controls.new = new("ButtonControl", {"RIGHT",self.controls.rename,"LEFT"}, -4, 0, 60, 18, "New", function()
-		--local newLoadout = self:RenameLoadout("", "New Loadout", true)
-		--self.build:SetActiveLoadout(newLoadout)
 		self:LoadoutPopup(self.selValue, "new")
 	end)
 	self.controls.edit = new("ButtonControl", {"LEFT",self.controls.delete,"RIGHT"}, 4, 0, 60, 18, "Edit", function()
@@ -314,7 +310,7 @@ end
 
 function LoadoutListControlClass:OnSelClick(index, loadout, doubleClick)
 	if doubleClick and index ~= self.build.activeLoadout then
-		self.build:SetActiveLoadout(index)
+		self.build:SetActiveLoadout(loadout.setName)
 	end
 end
 

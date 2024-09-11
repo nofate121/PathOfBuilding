@@ -355,12 +355,6 @@ function main:OnFrame()
 	end
 
 	self:CallMode("OnFrame", self.inputEvents, self.viewPort)
-	
-	-- if self.mode =="BUILD" then
-	-- 	self.modes["BUILD"]:OnFrame(self.inputEvents)
-	-- else
-	-- 	self.modes["LIST"]:OnFrame(self.inputEvents, self.viewPort)
-	-- end
 
 	if launch.updateErrMsg then
 		t_insert(self.toastMessages, string.format("Update check failed!\n%s", launch.updateErrMsg))

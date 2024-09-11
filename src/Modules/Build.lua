@@ -249,48 +249,6 @@ function buildMode:Init(dbFileName, buildName, buildXML, convertBuild, importLin
 			self.controls.buildLoadouts:SetSel(1)
 			return
 		end
-		if value == "^7^7New Loadout" then
-			local controls = { }
-			controls.label = new("LabelControl", nil, 0, 20, 0, 16, "^7Enter name for this loadout:")
-			controls.edit = new("EditControl", {"TOP",controls.label,"BOTTOM"}, 0, 4, 350, 20, "New Loadout", nil, nil, 100, function(buf)
-				controls.save.enabled = buf:match("%S")
-			end)
-
-			controls.checkCopy = new("CheckBoxControl", {"TOP",controls.edit,"BOTTOM"}, 0, 10, 20, "Copy Loadout", function(state) 
-				controls.loadoutList.enabled = state
-			end, "Create a copy of another Loadout", false)
-			controls.loadoutList = new("DropDownControl", {"LEFT",controls.checkCopy,"RIGHT"}, 8, 0, 190, 20, {}, nil)
-			controls.loadoutList.enabled = false
-			controls.checkCopy.x = (controls.checkCopy.width + 8 + controls.loadoutList.width) / -4
-			
-			
-			controls.loadoutList:SetList(self:GetLoadoutNamesList())
-
-			controls.save = new("ButtonControl", {"TOP",controls.edit,"BOTTOM"}, -45, 40, 80, 20, "Save", function()
-				local loadout = controls.edit.buf
-
-				if not controls.checkCopy.state then
-					-- create new loadout
-
-					self:NewLoadout(loadout)
-				else
-					-- copy loadout			
-					self:CopyLoadout(controls.loadoutList:GetSelValue(), loadout, true)
-				end
-
-				self:SyncLoadouts()
-				self.modFlag = true
-				main:ClosePopup()
-			end)
-			controls.save.enabled = false
-			controls.cancel = new("ButtonControl", {"TOP",controls.edit,"BOTTOM"}, 45, 40, 80, 20, "Cancel", function()
-				main:ClosePopup()
-			end)
-			main:OpenPopup(370, 130, "Set Name", controls, "save", "edit", "cancel")
-
-			self.controls.buildLoadouts:SetSel(1)
-			return
-		end
 
 		self:SetActiveLoadout(value)
 
@@ -954,7 +912,6 @@ function buildMode:SyncLoadouts()
 
 	-- giving the options unique formatting so it can not match with user-created sets
 	t_insert(filteredList, "^7^7-----")
-	t_insert(filteredList, "^7^7New Loadout")
 	t_insert(filteredList, "^7^7Sync")
 	t_insert(filteredList, "^7^7Help >>")
 
@@ -2069,87 +2026,6 @@ local function findNamedSetId(treeList, value, setSpecialLinks)
 		end
 	end
 	return nil
-end
-
-function buildMode:CopyLoadout(loadoutToCopy, newLoadoutName, setNewLoadoutAsActive)
-
-	local oneItem = self.itemsTab and #self.itemsTab.itemSetOrderList == 1
-	local oneSkill = self.skillsTab and #self.skillsTab.skillSetOrderList == 1
-	local oneConfig = self.configTab and #self.configTab.configSetOrderList == 1
-
-	local copySpecId = findNamedSetId(self.treeTab:GetSpecList(), loadoutToCopy, self.treeListSpecialLinks)
-	local copyItemId = oneItem and 1 or findSetId(self.itemsTab.itemSetOrderList, loadoutToCopy, self.itemsTab.itemSets, self.itemListSpecialLinks)
-	local copySkillId = oneSkill and 1 or findSetId(self.skillsTab.skillSetOrderList, loadoutToCopy, self.skillsTab.skillSets, self.skillListSpecialLinks)
-	local copyConfigId = oneConfig and 1 or findSetId(self.configTab.configSetOrderList, loadoutToCopy, self.configTab.configSets, self.configListSpecialLinks)
-
-	-- if exact match nor special grouping cannot find setIds, bail
-	if copySpecId == nil or copyItemId == nil or copySkillId == nil or copyConfigId == nil then
-		return
-	end
-
-	local copySpec = self.treeTab.specList[copySpecId]
-	local copyItem = self.itemsTab.itemSets[copyItemId]
-	local copySkill = self.skillsTab.skillSets[copySkillId]
-	local copyConfig = self.configTab.configSets[copyConfigId]
-	
-	local newSpecId = nil
-	local newItemId = nil
-	local newSkillId = nil
-	local newConfigId = nil
-	
-	-- copy tree
-	local newSpec = self.treeTab:CopySpec(copySpecId, newLoadoutName)
-
-	newSpecId = #self.treeTab.specList
-
-	-- copy item
-	if not oneItem then
-		local newItemSet = self.itemsTab:CopyItemSet(copyItemId, newLoadoutName)
-
-		newItemId = newItemSet.id
-	else
-		newItemId = copyItemId
-	end
-
-	--copy skill
-	if not oneSkill then
-		local newSkill = self.skillsTab:CopySkillSet(copySkillId, newLoadoutName)
-		
-		newSkillId = newSkill.id
-	else
-		newSkillId = copySkillId
-	end
-
-	-- copy config
-	if not oneConfig then
-		local newConfig = self.configTab:CopyConfigSet(copyConfigId, newLoadoutName)
-
-		newConfigId = newConfig.id
-	else
-		newConfigId = copyConfigId
-	end
-
-
-	if setNewLoadoutAsActive then
-
-		if newSpecId ~= self.treeTab.activeSpec then
-			self.treeTab:SetActiveSpec(newSpecId)
-		end
-		if newItemId ~= self.itemsTab.activeItemSetId then
-			self.itemsTab:SetActiveItemSet(newItemId)
-		end
-		if newSkillId ~= self.skillsTab.activeSkillSetId then
-			self.skillsTab:SetActiveSkillSet(newSkillId)
-		end
-		if newConfigId ~= self.configTab.activeConfigSetId then
-			self.configTab:SetActiveConfigSet(newConfigId)
-		end
-		
-		--self.controls.buildLoadouts:SelByValue(loadoutToCopy)
-
-	end
-
-
 end
 
 function buildMode:SetActiveLoadout(value)
