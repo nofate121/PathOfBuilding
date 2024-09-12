@@ -8,32 +8,32 @@ local t_remove = table.remove
 local ipairs = ipairs
 local m_max = math.max
 
-local LoadoutListControlClass = newClass("LoadoutListControl", "ListControl", function(self, anchor, x, y, width, height, build)
+local LoadoutListControlClass = newClass("LoadoutListControl", "ListControl", function(self, anchor, rect, build)
 	local loadoutlist = build:GetLoadoutList()
-	self.ListControl(anchor, x, y, width, height, 16, "VERTICAL", false, loadoutlist)
+	self.ListControl(anchor, rect, 16, "VERTICAL", false, loadoutlist)
 	self.build = build
-	self.controls.copy = new("ButtonControl", {"BOTTOM",self,"TOP"}, 0, -4, 60, 18, "Copy", function()
+	self.controls.copy = new("ButtonControl", {"BOTTOM",self,"TOP"}, {0, -4, 60, 18}, "Copy", function()
 		self:LoadoutPopup(self.selValue, "copy")
 	end)
 	self.controls.copy.enabled = function()
 		return self.selValue ~= nil
 	end
-	self.controls.delete = new("ButtonControl", {"LEFT",self.controls.copy,"RIGHT"}, 4, 0, 60, 18, "Delete", function()
+	self.controls.delete = new("ButtonControl", {"LEFT",self.controls.copy,"RIGHT"}, {4, 0, 60, 18}, "Delete", function()
 		self:OnSelDelete(self.selIndex, self.selValue)
 	end)
 	self.controls.delete.enabled = function()
 		return self.selValue ~= nil and #self.list > 1
 	end
-	self.controls.rename = new("ButtonControl", {"RIGHT",self.controls.copy,"LEFT"}, -2, 0, 60, 18, "Rename", function()
+	self.controls.rename = new("ButtonControl", {"RIGHT",self.controls.copy,"LEFT"}, {-2, 0, 60, 18}, "Rename", function()
 		self:RenameLoadout(self.selValue, "Rename Loadout")
 	end)
 	self.controls.rename.enabled = function()
 		return self.selValue ~= nil
 	end
-	self.controls.new = new("ButtonControl", {"RIGHT",self.controls.rename,"LEFT"}, -4, 0, 60, 18, "New", function()
+	self.controls.new = new("ButtonControl", {"RIGHT",self.controls.rename,"LEFT"}, {-4, 0, 60, 18}, "New", function()
 		self:LoadoutPopup(self.selValue, "new")
 	end)
-	self.controls.edit = new("ButtonControl", {"LEFT",self.controls.delete,"RIGHT"}, 4, 0, 60, 18, "Edit", function()
+	self.controls.edit = new("ButtonControl", {"LEFT",self.controls.delete,"RIGHT"}, {4, 0, 60, 18}, "Edit", function()
 		-- edit loadout popup
 		self:LoadoutPopup(self.selValue, "edit")
 	end)
@@ -45,11 +45,11 @@ end)
 
 function LoadoutListControlClass:RenameLoadout(loadout, title, addOnName)
 	local controls = { }
-	controls.label = new("LabelControl", nil, 0, 20, 0, 16, "^7Enter name for loadout:")
-	controls.edit = new("EditControl", nil, 0, 40, 350, 20, loadout, nil, nil, 100, function(buf)
+	controls.label = new("LabelControl", nil, {0, 20, 0, 16}, "^7Enter name for loadout:")
+	controls.edit = new("EditControl", nil, {0, 40, 350, 20}, loadout, nil, nil, 100, function(buf)
 		controls.save.enabled = buf:match("%S")
 	end)
-	controls.save = new("ButtonControl", nil, -45, 70, 80, 20, "Save", function()
+	controls.save = new("ButtonControl", nil, {-45, 70, 80, 20}, "Save", function()
 		local newName = controls.edit.buf
 		self.build.modFlag = true
 		if addOnName then
@@ -65,7 +65,7 @@ function LoadoutListControlClass:RenameLoadout(loadout, title, addOnName)
 		main:ClosePopup()
 	end)
 	controls.save.enabled = false
-	controls.cancel = new("ButtonControl", nil, 45, 70, 80, 20, "Cancel", function()
+	controls.cancel = new("ButtonControl", nil, {45, 70, 80, 20}, "Cancel", function()
 		main:ClosePopup()
 	end)
 	main:OpenPopup(370, 100, title, controls, "save", "edit")
@@ -75,7 +75,7 @@ end
 
 function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	local controls = { }
-	controls.label = new("LabelControl", nil, 0, 20, 0, 16, "^7Enter name for loadout:")
+	controls.label = new("LabelControl", nil, {0, 20, 0, 16}, "^7Enter name for loadout:")
 	-- automatically select next free set link number
 	local nextFreeId = self.build:GetNextLoadoutLinkId()
 	local loadoutName = ""
@@ -90,15 +90,15 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	elseif mode == "copy" then
 		loadoutName = "Copy of " .. loadout.setName .. " {" .. nextFreeId .. "}"
 	end
-	controls.edit = new("EditControl", nil, 0, 40, 350, 20, loadoutName, nil, nil, 100, function(buf)
+	controls.edit = new("EditControl", nil, {0, 40, 350, 20}, loadoutName, nil, nil, 100, function(buf)
 		controls.save.enabled = buf:match("%S")
 	end)
 
-	controls.label2 = new("LabelControl", {"TOP",controls.edit,"BOTTOM"}, 0, 20, 0, 16, "^7Select sets for this loadout:")
+	controls.label2 = new("LabelControl", {"TOP",controls.edit,"BOTTOM"}, {0, 20, 0, 16}, "^7Select sets for this loadout:")
 	
 	local backgroundColor = 0.15
 
-	controls.setListTree = new("DropDownControl", {"TOP",controls.label2,"BOTTOM"}, 0, 10, 190, 20, nil, function(index,value)
+	controls.setListTree = new("DropDownControl", {"TOP",controls.label2,"BOTTOM"}, {0, 10, 190, 20}, nil, function(index,value)
 		controls.save.enabled = true
 		if value == "^7^7-----" then
 			controls.setListTree:SetSel(1)
@@ -131,11 +131,11 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 			tooltip:AddLine(16, "^7"..controls.setListTree:GetSelValue())
 		end
 	end
-	controls.checkShareTree = new("CheckBoxControl", {"RIGHT",controls.setListTree,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
-	controls.labelTree = new("LabelControl", {"LEFT", controls.setListTree,"RIGHT"}, 5, 0, 0, 16, "^7Tree Set")
+	controls.checkShareTree = new("CheckBoxControl", {"RIGHT",controls.setListTree,"LEFT"}, {-5, 0, 20}, "Share Set", nil, nil, false)
+	controls.labelTree = new("LabelControl", {"LEFT", controls.setListTree,"RIGHT"}, {5, 0, 0, 16}, "^7Tree Set")
 	
 
-	controls.setListItem = new("DropDownControl", {"TOP",controls.setListTree,"BOTTOM"}, 0, 15, 190, 20, nil, function(index,value)
+	controls.setListItem = new("DropDownControl", {"TOP",controls.setListTree,"BOTTOM"}, {0, 15, 190, 20}, nil, function(index,value)
 		controls.save.enabled = true
 		if value == "^7^7-----" then
 			controls.setListItem:SetSel(1)
@@ -165,11 +165,11 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 			tooltip:AddLine(16, "^7"..controls.setListItem:GetSelValue())
 		end
 	end
-	controls.checkShareItem = new("CheckBoxControl", {"RIGHT",controls.setListItem,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
-	controls.labelItem = new("LabelControl", {"LEFT", controls.setListItem,"RIGHT"}, 5, 0, 0, 16, "^7Item Set")
+	controls.checkShareItem = new("CheckBoxControl", {"RIGHT",controls.setListItem,"LEFT"}, {-5, 0, 20}, "Share Set", nil, nil, false)
+	controls.labelItem = new("LabelControl", {"LEFT", controls.setListItem,"RIGHT"}, {5, 0, 0, 16}, "^7Item Set")
 	
 
-	controls.setListSkill = new("DropDownControl", {"TOP",controls.setListItem,"BOTTOM"}, 0, 15, 190, 20, nil, function(index,value)
+	controls.setListSkill = new("DropDownControl", {"TOP",controls.setListItem,"BOTTOM"}, {0, 15, 190, 20}, nil, function(index,value)
 		controls.save.enabled = true
 		if value == "^7^7-----" then
 			controls.setListSkill:SetSel(1)
@@ -199,11 +199,11 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 			tooltip:AddLine(16, "^7"..controls.setListSkill:GetSelValue())
 		end
 	end
-	controls.checkShareSkill = new("CheckBoxControl", {"RIGHT",controls.setListSkill,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
-	controls.labelSkill = new("LabelControl", {"LEFT", controls.setListSkill,"RIGHT"}, 5, 0, 0, 16, "^7Skill Set")
+	controls.checkShareSkill = new("CheckBoxControl", {"RIGHT",controls.setListSkill,"LEFT"}, {-5, 0, 20}, "Share Set", nil, nil, false)
+	controls.labelSkill = new("LabelControl", {"LEFT", controls.setListSkill,"RIGHT"}, {5, 0, 0, 16}, "^7Skill Set")
 	
 
-	controls.setListConfig = new("DropDownControl", {"TOP",controls.setListSkill,"BOTTOM"}, 0, 15, 190, 20, nil, function(index,value)
+	controls.setListConfig = new("DropDownControl", {"TOP",controls.setListSkill,"BOTTOM"}, {0, 15, 190, 20}, nil, function(index,value)
 		controls.save.enabled = true
 		if value == "^7^7-----" then
 			controls.setListConfig:SetSel(1)
@@ -235,8 +235,8 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 			tooltip:AddLine(16, "^7"..controls.setListConfig:GetSelValue())
 		end
 	end
-	controls.checkShareConfig = new("CheckBoxControl", {"RIGHT",controls.setListConfig,"LEFT"}, -5, 0, 20, "Share Set", nil, nil, false)
-	controls.labelConfig = new("LabelControl", {"LEFT", controls.setListConfig,"RIGHT"}, 5, 0, 0, 16, "^7Config Set")
+	controls.checkShareConfig = new("CheckBoxControl", {"RIGHT",controls.setListConfig,"LEFT"}, {-5, 0, 20}, "Share Set", nil, nil, false)
+	controls.labelConfig = new("LabelControl", {"LEFT", controls.setListConfig,"RIGHT"}, {5, 0, 0, 16}, "^7Config Set")
 	
 	if mode == "edit" then
 		controls.checkShareTree.state = true
@@ -250,7 +250,7 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 		controls.checkShareConfig.enabled = false
 	end
 
-	controls.save = new("ButtonControl", {"TOP",controls.setListConfig,"BOTTOM"}, -45, 20, 80, 20, "Save", function()
+	controls.save = new("ButtonControl", {"TOP",controls.setListConfig,"BOTTOM"}, {-45, 20, 80, 20}, "Save", function()
 		local newName = controls.edit.buf
 		local treeSetId = nil
 		if controls.setListTree.selIndex <= #self.build.treeTab.specList then
@@ -282,7 +282,7 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	end)
 	controls.save.enabled = false
 
-	controls.cancel = new("ButtonControl", {"TOP",controls.setListConfig,"BOTTOM"}, 45, 20, 80, 20, "Cancel", function()
+	controls.cancel = new("ButtonControl", {"TOP",controls.setListConfig,"BOTTOM"}, {45, 20, 80, 20}, "Cancel", function()
 		main:ClosePopup()
 	end)
 	local title = ""
