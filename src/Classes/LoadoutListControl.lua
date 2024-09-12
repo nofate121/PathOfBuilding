@@ -131,7 +131,7 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 			tooltip:AddLine(16, "^7"..controls.setListTree:GetSelValue())
 		end
 	end
-	controls.checkShareTree = new("CheckBoxControl", {"RIGHT",controls.setListTree,"LEFT"}, {-5, 0, 20}, "Share Set", nil, nil, false)
+	controls.checkShareTree = new("CheckBoxControl", {"RIGHT",controls.setListTree,"LEFT"}, {-5, 0, 20}, "Share Set", function(state) controls.save.enabled = true end, nil, false)
 	controls.labelTree = new("LabelControl", {"LEFT", controls.setListTree,"RIGHT"}, {5, 0, 0, 16}, "^7Tree Set")
 	
 
@@ -165,7 +165,7 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 			tooltip:AddLine(16, "^7"..controls.setListItem:GetSelValue())
 		end
 	end
-	controls.checkShareItem = new("CheckBoxControl", {"RIGHT",controls.setListItem,"LEFT"}, {-5, 0, 20}, "Share Set", nil, nil, false)
+	controls.checkShareItem = new("CheckBoxControl", {"RIGHT",controls.setListItem,"LEFT"}, {-5, 0, 20}, "Share Set", function(state) controls.save.enabled = true end, nil, false)
 	controls.labelItem = new("LabelControl", {"LEFT", controls.setListItem,"RIGHT"}, {5, 0, 0, 16}, "^7Item Set")
 	
 
@@ -199,7 +199,7 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 			tooltip:AddLine(16, "^7"..controls.setListSkill:GetSelValue())
 		end
 	end
-	controls.checkShareSkill = new("CheckBoxControl", {"RIGHT",controls.setListSkill,"LEFT"}, {-5, 0, 20}, "Share Set", nil, nil, false)
+	controls.checkShareSkill = new("CheckBoxControl", {"RIGHT",controls.setListSkill,"LEFT"}, {-5, 0, 20}, "Share Set", function(state) controls.save.enabled = true end, nil, false)
 	controls.labelSkill = new("LabelControl", {"LEFT", controls.setListSkill,"RIGHT"}, {5, 0, 0, 16}, "^7Skill Set")
 	
 
@@ -235,7 +235,7 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 			tooltip:AddLine(16, "^7"..controls.setListConfig:GetSelValue())
 		end
 	end
-	controls.checkShareConfig = new("CheckBoxControl", {"RIGHT",controls.setListConfig,"LEFT"}, {-5, 0, 20}, "Share Set", nil, nil, false)
+	controls.checkShareConfig = new("CheckBoxControl", {"RIGHT",controls.setListConfig,"LEFT"}, {-5, 0, 20}, "Share Set", function(state) controls.save.enabled = true end, nil, false)
 	controls.labelConfig = new("LabelControl", {"LEFT", controls.setListConfig,"RIGHT"}, {5, 0, 0, 16}, "^7Config Set")
 	
 	if mode == "edit" then
@@ -293,7 +293,7 @@ function LoadoutListControlClass:LoadoutPopup(loadout, mode)
 	elseif mode == "edit" then
 		title = "Edit Loadout"
 	end
-	main:OpenPopup(480, 290, title, controls, "save", "edit")
+	main:OpenPopup(480, 290, title, controls, "save", nil)
 
 	return loadout
 end
@@ -310,7 +310,8 @@ end
 
 function LoadoutListControlClass:OnSelClick(index, loadout, doubleClick)
 	if doubleClick and index ~= self.build.activeLoadout then
-		self.build:SetActiveLoadout(loadout.setName)
+		-- self.build:SetActiveLoadout(loadout.setName)
+		self:LoadoutPopup(loadout, "edit")
 	end
 end
 

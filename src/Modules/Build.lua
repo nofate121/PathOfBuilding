@@ -241,7 +241,6 @@ function buildMode:Init(dbFileName, buildName, buildXML, convertBuild, importLin
 		end
 		if value == "^7^7Sync" then
 			self:SyncLoadouts()
-			self.controls.buildLoadouts:SetSel(1)
 			return
 		end
 		if value == "^7^7Help >>" then
