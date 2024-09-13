@@ -2061,8 +2061,11 @@ end
 function buildMode:RenameLoadout()
 end
 
--- if a setId is nil this will create a new set
--- loadout should be nil when you want to copy or create new loadout
+-- Function to manipulate a loadout. Edit, Copy and New Loadout supported.
+-- loadout - should be one of the values of the GetLoadoutList() if you want to edit or nil for copy and new 
+-- newName - string: the new name of the loadout possibly also containing one linkId
+-- newTreeSetId, newItemSetId, newSkillSetId, newConfigSetId - number: the set id the loadout should use or nil if a new set should be created
+-- shareTreeSet, shareItemSet, shareSkillSet, shareConfigSet - bool: true -> share the set, false -> copy the set 
 function buildMode:ManageLoadout(loadout, newName, newTreeSetId, newItemSetId, newSkillSetId, newConfigSetId, shareTreeSet, shareItemSet, shareSkillSet, shareConfigSet)
 	local linkId = loadout and loadout.linkId or nil
 	local newLinkId = string.match(newName, "%{(%w+)%}")
